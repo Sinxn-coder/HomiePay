@@ -16,6 +16,7 @@ import { AppTutorial } from "@/components/app-tutorial"
 import { NotificationsDialog } from "@/components/notifications-dialog"
 import { useStore } from "@/store/useStore"
 import { Button } from "@/components/ui/button"
+import { supabase } from "@/lib/supabase"
 import dynamic from "next/dynamic"
 import { SavedBill } from "@/lib/types"
 
@@ -58,6 +59,27 @@ export function ExpenseSplitter({
     if (userSession) {
       store.syncPendingData()
       store.fetchPendingInvites()
+      
+      const channel = supabase
+        .channel('invites_channel')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'group_invites',
+            filter: `to_user_id=eq.${userSession.id}`
+          },
+          () => {
+            // Trigger fetch when a new invite is received
+            store.fetchPendingInvites()
+          }
+        )
+        .subscribe()
+        
+      return () => {
+        supabase.removeChannel(channel)
+      }
     }
   }, [userSession])
 
