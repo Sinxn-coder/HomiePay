@@ -92,7 +92,9 @@ export const useStore = create<StoreState>()((set, get, api) => ({
 
     if (!groupErr && remoteGroups) {
       allRelevantGroupIds = remoteGroups.map((g: any) => g.id)
+      const remoteGroupIdSet = new Set(allRelevantGroupIds)
       
+      // Merge remote groups into local
       remoteGroups.forEach((rg: any) => {
         const localIdx = mergedGroups.findIndex(lg => lg.id === rg.id)
         const formattedRemote = {
@@ -116,10 +118,24 @@ export const useStore = create<StoreState>()((set, get, api) => ({
           mergedGroups.push(formattedRemote)
         }
       })
+
+      // Evict local groups that no longer exist in remote.
+      // Only remove groups that were previously synced — unsynced groups are
+      // offline-created and haven't been pushed yet, so keep them.
+      mergedGroups = mergedGroups.filter(lg => {
+        if (lg.synced === false) return true   // keep unsynced (offline-created)
+        return remoteGroupIdSet.has(lg.id)     // keep only if still in remote
+      })
       
       const GROUPS_STORAGE_KEY = `homiepay-saved-groups-${userId}`
       localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(mergedGroups))
       get().setGroups(mergedGroups)
+
+      // Also clean up joined-group-ids list for any groups now gone
+      const cleanedJoinedIds = joinedIds.filter(id => remoteGroupIdSet.has(id))
+      if (cleanedJoinedIds.length !== joinedIds.length) {
+        localStorage.setItem(storedJoinedKey, JSON.stringify(cleanedJoinedIds))
+      }
     } else {
       allRelevantGroupIds = groups.map(g => g.id)
     }
@@ -134,7 +150,17 @@ export const useStore = create<StoreState>()((set, get, api) => ({
     let mergedBills = [...get().savedBills]
 
     if (!billErr && remoteBills) {
+      // Get pending-delete bill IDs so we don't re-add them from remote
+      const pendingDeleteBillsKey = `homiepay-pending-delete-bills-${userId}`
+      const storedPendingDeletes = localStorage.getItem(pendingDeleteBillsKey)
+      const pendingDeleteIds: string[] = storedPendingDeletes ? JSON.parse(storedPendingDeletes) : []
+
+      const remoteBillIdSet = new Set(remoteBills.map((rb: any) => rb.id))
+
       remoteBills.forEach((rb: any) => {
+        // Skip bills that are pending local deletion
+        if (pendingDeleteIds.includes(rb.id)) return
+
         const localIdx = mergedBills.findIndex(lb => lb.id === rb.id)
         const formattedRemote = {
           id: rb.id,
@@ -161,6 +187,14 @@ export const useStore = create<StoreState>()((set, get, api) => ({
         }
       })
 
+      // Evict local bills that no longer exist in remote.
+      // Preserve: unsynced (offline-created) bills and pending-delete bills.
+      mergedBills = mergedBills.filter(lb => {
+        if (lb.synced === false) return true           // keep offline-created
+        if (pendingDeleteIds.includes(lb.id)) return false // pending delete — already removed locally
+        return remoteBillIdSet.has(lb.id)              // keep only if still in remote
+      })
+
       const BILLS_STORAGE_KEY = `homiepay-saved-bills-${userId}`
       localStorage.setItem(BILLS_STORAGE_KEY, JSON.stringify(mergedBills))
       get().setSavedBills(mergedBills)
@@ -180,7 +214,7 @@ export const useStore = create<StoreState>()((set, get, api) => ({
       const storedDeleteBills = localStorage.getItem(pendingDeleteBillsKey)
       const deleteBillIds: string[] = storedDeleteBills ? JSON.parse(storedDeleteBills) : []
       if (deleteBillIds.length > 0) {
-        const { error } = await supabase.from("bills").delete().in("id", deleteBillIds)
+        const { error } = await supabase.from("bills").delete().in("id", deleteBillIds).eq("user_id", currentUserId)
         if (!error) localStorage.removeItem(pendingDeleteBillsKey)
       }
     } catch (e) {

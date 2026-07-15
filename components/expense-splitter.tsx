@@ -14,7 +14,14 @@ import { ProfileView } from "@/components/profile-view"
 import { AppTutorial } from "@/components/app-tutorial"
 import { useStore } from "@/store/useStore"
 import { Button } from "@/components/ui/button"
+import dynamic from "next/dynamic"
 import { SavedBill } from "@/lib/types"
+
+// Loaded client-side only — Three.js Canvas can't run on the server
+const FluidGlassNav = dynamic(
+  () => import("@/components/fluid-glass-nav").then(m => ({ default: m.FluidGlassNav })),
+  { ssr: false }
+)
 
 const STEP_LABELS = ["Friends", "Products", "Assign", "Payer", "Summary"]
 
@@ -27,8 +34,10 @@ export function ExpenseSplitter({
 }) {
   const [activeTab, setActiveTab] = useState<"groups" | "splitter" | "history" | "profile">("groups")
   const navSwipeRef = useRef({ startX: 0, active: false })
-  const bgRef = useRef<HTMLDivElement>(null)
   const navTabs = ["groups", "splitter", "history", "profile"] as const
+  const [dragOffset, setDragOffset] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isPressing, setIsPressing] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [installPrompt, setInstallPrompt] = useState<any>(null)
   const [showPwaPopup, setShowPwaPopup] = useState(false)
@@ -556,51 +565,38 @@ export function ExpenseSplitter({
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
           navSwipeRef.current = { startX: e.clientX, active: true };
-          if (bgRef.current) {
-            bgRef.current.style.transition = 'none';
-          }
+          setIsDragging(true);
+          setDragOffset(0);
+          setIsPressing(true);
         }}
         onPointerMove={(e) => {
           if (!navSwipeRef.current.active) return;
           const deltaX = e.clientX - navSwipeRef.current.startX;
-          
           const currentIndex = navTabs.indexOf(activeTab);
           const tabWidth = typeof window !== 'undefined' ? (window.innerWidth - 40) / 4 : 90;
           const maxDrag = tabWidth / 2;
-          
           let clampedDelta = deltaX;
-          
-          // Limit drag out of bounds to exactly half of the pill width
           if (currentIndex === 0 && deltaX < 0) {
             clampedDelta = Math.max(deltaX, -maxDrag);
           } else if (currentIndex === navTabs.length - 1 && deltaX > 0) {
             clampedDelta = Math.min(deltaX, maxDrag);
           }
-          
-          if (bgRef.current) {
-            bgRef.current.style.transform = `translateX(calc(${currentIndex * 100}% + ${clampedDelta}px))`;
-          }
+          setDragOffset(clampedDelta);
         }}
         onPointerUp={(e) => {
           if (!navSwipeRef.current.active) return;
           navSwipeRef.current.active = false;
           e.currentTarget.releasePointerCapture(e.pointerId);
-          
-          if (bgRef.current) {
-            bgRef.current.style.transition = '';
-            bgRef.current.style.transform = ''; // Hand control back to React
-          }
-          
+          setIsDragging(false);
+          setDragOffset(0);
+          setIsPressing(false);
           const deltaX = e.clientX - navSwipeRef.current.startX;
           const tabWidth = typeof window !== 'undefined' ? (window.innerWidth - 40) / 4 : 90;
-          
           const currentIndex = navTabs.indexOf(activeTab);
           const shift = Math.round(deltaX / tabWidth);
           let nextIndex = currentIndex + shift;
-          
           if (nextIndex < 0) nextIndex = 0;
           if (nextIndex > 3) nextIndex = 3;
-          
           if (nextIndex !== currentIndex) {
             setActiveTab(navTabs[nextIndex]);
           }
@@ -608,17 +604,18 @@ export function ExpenseSplitter({
         onPointerCancel={(e) => {
           navSwipeRef.current.active = false;
           e.currentTarget.releasePointerCapture(e.pointerId);
-          if (bgRef.current) {
-            bgRef.current.style.transition = '';
-            bgRef.current.style.transform = '';
-          }
+          setIsDragging(false);
+          setDragOffset(0);
+          setIsPressing(false);
         }}
       >
-        {/* Sliding Active Background ("Water Drop" effect) */}
-        <div 
-          ref={bgRef}
-          className="ios-nav-active-bg" 
-          style={{ transform: `translateX(${navTabs.indexOf(activeTab) * 100}%)` }} 
+        {/* Three.js Fluid Glass highlighter */}
+        <FluidGlassNav
+          activeIndex={navTabs.indexOf(activeTab)}
+          tabCount={navTabs.length}
+          dragOffset={dragOffset}
+          isDragging={isDragging}
+          isPressed={isPressing}
         />
         
         <button

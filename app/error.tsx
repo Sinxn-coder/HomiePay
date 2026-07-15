@@ -16,9 +16,15 @@ export default function Error({ error, reset }: ErrorProps) {
   }, [error])
 
   const handleResetData = () => {
-    // Completely reset localStorage to flush any corrupted state
-    localStorage.clear()
-    window.location.href = "/"
+    try {
+      localStorage.clear()
+      sessionStorage.clear()
+    } catch (e) {
+      // storage might be blocked in some browsers
+    }
+    // Use replace() so the error page is removed from history,
+    // and add a cache-busting param to force a fresh page load.
+    window.location.replace("/?reset=" + Date.now())
   }
 
   return (

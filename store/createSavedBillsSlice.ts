@@ -141,7 +141,7 @@ export const createSavedBillsSlice: StateCreator<
       ;(async () => {
         if (navigator.onLine) {
           try {
-            const { error } = await supabase.from("bills").delete().eq("id", billId)
+            const { error } = await supabase.from("bills").delete().eq("id", billId).eq("user_id", userSession.id)
             if (!error) return
           } catch (err) {
             console.warn("Supabase failed to delete bill in background:", err)
