@@ -464,6 +464,15 @@ export function GroupsView({
                   )}
                 </div>
               </div>
+              <Button
+                size="sm"
+                onClick={() => onSelectGroup(activeGroup.id)}
+                className="shrink-0 h-[38px] px-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 rounded-xl flex flex-col items-center justify-center gap-0.5 cursor-pointer ml-1"
+                title="Start a new bill for this group"
+              >
+                <Receipt className="h-4 w-4" />
+                <span className="text-[8px] font-extrabold uppercase tracking-wider leading-none">New Bill</span>
+              </Button>
             </div>
           </CardContent>
         </Card>
