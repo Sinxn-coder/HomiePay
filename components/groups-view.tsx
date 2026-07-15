@@ -1026,22 +1026,27 @@ export function GroupsView({
                   </p>
                 </div>
                 <Button
-                  className="w-full h-12 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  className="w-full h-12 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => onSelectGroup(activeGroup.id)}
-                  disabled={activeGroup.members.length === 0}
+                  disabled={activeGroup.members.length < 2}
                 >
                   <Receipt className="h-4 w-4 mr-2" />
-                  {activeGroup.members.length === 0 ? "Add members first" : "Start Bill with Group"}
+                  {activeGroup.members.length < 2 ? "Can't create bill" : "Start Bill with Group"}
                 </Button>
-                {activeGroup.members.length === 0 && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setGroupDetailTab("members")}
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Go to Members
-                  </Button>
+                {activeGroup.members.length < 2 && (
+                  <div className="mt-3 text-center">
+                    <p className="text-sm font-semibold text-rose-500">
+                      You need at least 2 members to split a bill.
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="w-full mt-2"
+                      onClick={() => setGroupDetailTab("members")}
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Add members first
+                    </Button>
+                  </div>
                 )}
               </div>
             </CardContent>
