@@ -1039,26 +1039,10 @@ export function GroupsView({
 
   return (
     <div className="space-y-4">
-      {/* Quick Start */}
-      <Card className="border-border/50 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold">Quick Split</h3>
-              <p className="text-sm text-muted-foreground">
-                Start a new bill without a group
-              </p>
-            </div>
-            <Button onClick={onNewBill} className="gap-2">
-              <Receipt className="h-4 w-4" />
-              New Bill
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Groups */}
-      <Card className="border-border/50 shadow-lg">
+      <Card className="w-[95%] mx-auto sm:w-full border-border/50 shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
