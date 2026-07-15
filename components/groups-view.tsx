@@ -1042,7 +1042,7 @@ export function GroupsView({
 
 
       {/* Groups */}
-      <Card className="w-[95%] mx-auto sm:w-full border-border/50 shadow-lg">
+      <Card className="w-[98%] mx-auto sm:w-full border-border/50 shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
