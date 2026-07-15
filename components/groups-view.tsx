@@ -24,6 +24,7 @@ import { MobileBottomSheet } from "@/components/mobile-bottom-sheet"
 import { PremiumModal } from "@/components/premium-modal"
 import type { Group, Person, SavedBill } from "@/lib/types"
 import { calculateGroupBalances, calculateSplits, calculateOwes } from "@/lib/finance-engine"
+import { toast } from "sonner"
 
 interface GroupsViewProps {
   groups: Group[]
