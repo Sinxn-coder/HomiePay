@@ -72,6 +72,7 @@ export function GroupsView({
   const [newMemberName, setNewMemberName] = useState("")
   const [inviteUsername, setInviteUsername] = useState("")
   const [isInviting, setIsInviting] = useState(false)
+  const [sentInvites, setSentInvites] = useState<Record<string, string[]>>({})
   const [addMemberMode, setAddMemberMode] = useState<"local" | "invite">("local")
   const [addingMemberGroupId, setAddingMemberGroupId] = useState<string | null>(null)
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
