@@ -238,42 +238,6 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
         </div>
       </div>
 
-      {/* Etriq Branding Card */}
-      <div className="w-full mt-10 mb-6 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-6 duration-500 delay-150">
-        <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-          <span>Powered By</span>
-          <span className="w-8 h-[1px] bg-slate-200 dark:bg-slate-800 rounded-full"></span>
-        </div>
-        
-        <a 
-          href="https://etriq.com" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="group relative bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-none hover:shadow-2xl hover:shadow-slate-200 dark:hover:border-slate-700/80 transition-all duration-300 w-full max-w-lg flex flex-col sm:flex-row items-center gap-6 overflow-hidden cursor-pointer"
-        >
-          {/* Subtle glow effect on hover */}
-          <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-blue-500/0 group-hover:bg-blue-500/5 blur-3xl transition-colors duration-500 pointer-events-none" />
-          
-          {/* Etriq Logo / Icon */}
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-100 dark:to-slate-300 flex flex-col items-center justify-center text-white dark:text-slate-900 shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
-            <span className="font-black text-2xl italic tracking-tighter leading-none pr-1">E</span>
-            <div className="w-4 h-1 bg-blue-500 rounded-full mt-1"></div>
-          </div>
-
-          <div className="text-center sm:text-left space-y-2">
-            <div className="flex items-center justify-center sm:justify-start gap-2">
-              <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Etriq</h3>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-              We build beautiful, highly-functional digital experiences. Discover our latest projects and see how we can transform your ideas into reality.
-            </p>
-            <div className="pt-1 inline-flex items-center text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-              Visit Website <Sparkles className="h-3 w-3 ml-1" />
-            </div>
-          </div>
-        </a>
-      </div>
-
     </div>
   )
 }
