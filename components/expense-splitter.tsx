@@ -440,9 +440,11 @@ export function ExpenseSplitter({
                   onMarkPersonBillSettled={markPersonBillSettled}
                   onSelectGroup={(groupId) => {
                     const group = groups.find(g => g.id === groupId)
+                    resetAll()
                     loadGroupIntoActiveSplit(groupId)
                     setActiveGroupId(groupId)
                     setActiveGroupName(group?.name ?? null)
+                    setActiveBillId(null)
                     setCurrentStep(2) // Skip Step 1 (Friends) since group loaded them!
                     setActiveTab("splitter")
                   }}
