@@ -690,7 +690,7 @@ export function ExpenseSplitter({
           <img 
             src="etriqlogo.webp" 
             alt="Etriq" 
-            className="h-5 w-auto object-contain group-hover:scale-105 transition-transform duration-200" 
+            className="h-7 w-auto object-contain bg-slate-900 dark:bg-black p-1.5 rounded-lg shadow-sm group-hover:scale-105 transition-transform duration-200" 
           />
           <span className="text-sm font-black tracking-tight text-foreground/80 group-hover:text-emerald-600 transition-colors duration-200">Etriq</span>
         </a>
