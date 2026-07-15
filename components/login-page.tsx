@@ -236,6 +236,8 @@ ${uname}`
             setConfirmPassword("")
             setForgotSecurityAnswer("")
             setVerifiedUserId(null)
+            setPassword("") // Clear the old password from the login form
+            setLoginFailed(false)
           }, 1500)
         }
       } else {
