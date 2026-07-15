@@ -77,7 +77,7 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="w-[95vw] max-w-3xl relative left-1/2 -translate-x-1/2 sm:w-full sm:left-auto sm:translate-x-0 mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
       
       {/* Premium Gradient Header Card */}
       <div className="relative rounded-3xl p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-100 dark:shadow-none overflow-hidden flex flex-col sm:flex-row items-center gap-6">
