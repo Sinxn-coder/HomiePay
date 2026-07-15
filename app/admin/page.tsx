@@ -233,7 +233,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex overflow-hidden">
       
       {/* Expand-on-hover Side Navigation */}
-      <aside className="h-screen w-16 hover:w-64 bg-slate-900 text-slate-300 transition-all duration-300 ease-in-out flex flex-col shrink-0 overflow-hidden group border-r border-slate-800 absolute z-50 md:relative">
+      <aside className="h-screen w-16 hover:w-64 bg-slate-900 text-slate-300 transition-all duration-300 ease-in-out flex flex-col shrink-0 overflow-hidden group border-r border-slate-800 absolute z-50 left-0 top-0">
         <div className="h-16 flex items-center px-5 shrink-0 bg-slate-950/50">
           <Shield className="h-6 w-6 text-emerald-500 shrink-0" />
           <span className="ml-4 font-bold text-white tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">HomiePay Admin</span>
@@ -269,7 +269,7 @@ export default function AdminPage() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 h-screen overflow-y-auto pl-16 md:pl-0">
+      <main className="flex-1 h-screen overflow-y-auto pl-16 w-full">
         <div className="max-w-6xl mx-auto px-6 py-8">
           
           <header className="mb-8 flex items-center justify-between">
