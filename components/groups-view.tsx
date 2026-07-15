@@ -698,31 +698,7 @@ export function GroupsView({
                 </div>
               )}
 
-              {/* Mobile Add Member */}
-              <div className="sm:hidden pt-2">
-                <Button variant="outline" className="w-full" onClick={() => setAddingMemberGroupId(activeGroup.id)}>
-                  <Plus className="h-4 w-4 mr-1" />Add Member
-                </Button>
-                {addingMemberGroupId === activeGroup.id && (
-                  <MobileBottomSheet
-                    isOpen={addingMemberGroupId === activeGroup.id}
-                    onClose={() => { setAddingMemberGroupId(null); setNewMemberName("") }}
-                    title="Add Group Member"
-                  >
-                    <div className="space-y-4">
-                      <Input
-                        placeholder="Enter member name"
-                        value={newMemberName}
-                        onChange={(e) => setNewMemberName(e.target.value)}
-                        autoFocus
-                      />
-                      <Button className="w-full" onClick={() => handleAddMember(activeGroup.id)} disabled={!newMemberName.trim()}>
-                        Add Member
-                      </Button>
-                    </div>
-                  </MobileBottomSheet>
-                )}
-              </div>
+
             </CardContent>
           </Card>
         )}
