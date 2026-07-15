@@ -13,6 +13,7 @@ import { SavedBills } from "@/components/saved-bills"
 import { GroupsView } from "@/components/groups-view"
 import { ProfileView } from "@/components/profile-view"
 import { AppTutorial } from "@/components/app-tutorial"
+import { NotificationsDialog } from "@/components/notifications-dialog"
 import { useStore } from "@/store/useStore"
 import { Button } from "@/components/ui/button"
 import dynamic from "next/dynamic"
@@ -56,6 +57,7 @@ export function ExpenseSplitter({
     store.setUserSession(userSession)
     if (userSession) {
       store.syncPendingData()
+      store.fetchPendingInvites()
     }
   }, [userSession])
 
@@ -306,6 +308,8 @@ export function ExpenseSplitter({
                 Install App
               </Button>
             )}
+            
+            {userSession && <NotificationsDialog />}
 
             {savedBills.length > 0 && activeTab === "splitter" && currentStep === 5 && (
               <Button variant="outline" size="sm" onClick={handleNewBill} className="h-8 text-xs">
@@ -438,6 +442,7 @@ export function ExpenseSplitter({
                   }}
                   onDeleteBill={handleDeleteBill}
                   onMarkPersonBillSettled={markPersonBillSettled}
+                  onSendInvite={store.sendGroupInvite}
                   onSelectGroup={(groupId) => {
                     const group = groups.find(g => g.id === groupId)
                     resetAll()
@@ -552,6 +557,8 @@ export function ExpenseSplitter({
                   bills={savedBills}
                   onLoadBill={handleLoadBill}
                   onDeleteBill={handleDeleteBill}
+                  onNewBill={handleNewBill}
+                  onAddSettlement={addSettlement}
                 />
               </div>
             )}

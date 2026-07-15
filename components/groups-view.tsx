@@ -42,6 +42,7 @@ interface GroupsViewProps {
   onMarkPersonBillSettled: (billId: string, personId?: string) => void
   onNewBill: () => void
   onAddSettlement: (groupId: string, settlement: Omit<import("@/lib/types").Settlement, 'id' | 'createdAt'>) => void
+  onSendInvite?: (groupId: string, username: string) => Promise<{ success: boolean; message: string }>
 }
 
 export function GroupsView({
@@ -61,6 +62,7 @@ export function GroupsView({
   onMarkPersonBillSettled,
   onNewBill,
   onAddSettlement,
+  onSendInvite,
 }: GroupsViewProps) {
   const [newGroupName, setNewGroupName] = useState("")
   const [showAddGroup, setShowAddGroup] = useState(false)
@@ -68,6 +70,9 @@ export function GroupsView({
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null)
   const [editingGroupName, setEditingGroupName] = useState("")
   const [newMemberName, setNewMemberName] = useState("")
+  const [inviteUsername, setInviteUsername] = useState("")
+  const [isInviting, setIsInviting] = useState(false)
+  const [addMemberMode, setAddMemberMode] = useState<"local" | "invite">("local")
   const [addingMemberGroupId, setAddingMemberGroupId] = useState<string | null>(null)
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
   const [editingMemberName, setEditingMemberName] = useState("")
@@ -123,6 +128,19 @@ export function GroupsView({
       setNewGroupName("")
       setShowAddGroup(false)
       setExpandedGroupId(groupId)
+    }
+  }
+
+  const handleInviteUser = async (groupId: string) => {
+    if (!inviteUsername.trim() || !onSendInvite) return
+    setIsInviting(true)
+    const { success, message } = await onSendInvite(groupId, inviteUsername)
+    setIsInviting(false)
+    if (success) {
+      toast.success(message)
+      setInviteUsername("")
+    } else {
+      toast.error(message)
     }
   }
 
@@ -521,22 +539,53 @@ export function GroupsView({
         {/* ───────── Tab: Members ───────── */}
         {groupDetailTab === "members" && (
           <Card className="border-border/50 shadow-md animate-in fade-in duration-200">
-            <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+            <CardHeader className="pb-3 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div>
                 <CardTitle className="text-base font-bold">Group Members</CardTitle>
                 <p className="text-xs text-muted-foreground mt-0.5">Manage participants and split profiles</p>
               </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <Input
-                  placeholder="New member name"
-                  value={newMemberName}
-                  onChange={(e) => setNewMemberName(e.target.value)}
-                  className="h-9 w-40"
-                  onKeyDown={(e) => { if (e.key === "Enter") handleAddMember(activeGroup.id) }}
-                />
-                <Button size="sm" className="h-9" onClick={() => handleAddMember(activeGroup.id)} disabled={!newMemberName.trim()}>
-                  <Plus className="h-4 w-4 mr-1" />Add
-                </Button>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start sm:self-end">
+                  <button 
+                    onClick={() => setAddMemberMode("local")}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${addMemberMode === "local" ? "bg-white dark:bg-slate-700 shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Local Member
+                  </button>
+                  <button 
+                    onClick={() => setAddMemberMode("invite")}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${addMemberMode === "invite" ? "bg-white dark:bg-slate-700 shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Invite User
+                  </button>
+                </div>
+                {addMemberMode === "local" ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="New member name"
+                      value={newMemberName}
+                      onChange={(e) => setNewMemberName(e.target.value)}
+                      className="h-9 w-40 sm:w-48"
+                      onKeyDown={(e) => { if (e.key === "Enter") handleAddMember(activeGroup.id) }}
+                    />
+                    <Button size="sm" className="h-9" onClick={() => handleAddMember(activeGroup.id)} disabled={!newMemberName.trim()}>
+                      <Plus className="h-4 w-4 mr-1" />Add
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Username to invite"
+                      value={inviteUsername}
+                      onChange={(e) => setInviteUsername(e.target.value)}
+                      className="h-9 w-40 sm:w-48"
+                      onKeyDown={(e) => { if (e.key === "Enter") handleInviteUser(activeGroup.id) }}
+                    />
+                    <Button size="sm" className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => handleInviteUser(activeGroup.id)} disabled={!inviteUsername.trim() || isInviting || !onSendInvite}>
+                      {isInviting ? "..." : "Invite"}
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardHeader>
             <CardContent className="space-y-2">

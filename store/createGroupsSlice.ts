@@ -21,6 +21,11 @@ export interface GroupsSlice {
   joinGroupByShareCode: (code: string) => Promise<{ success: boolean; message: string; groupName?: string }>
 
   _saveGroupsToStorage: (newGroups: Group[]) => void
+
+  pendingInvites: import('../lib/types').GroupInvite[]
+  fetchPendingInvites: () => Promise<void>
+  sendGroupInvite: (groupId: string, username: string) => Promise<{ success: boolean; message: string }>
+  respondToInvite: (inviteId: string, accept: boolean) => Promise<{ success: boolean; message: string }>
 }
 
 export const createGroupsSlice: StateCreator<
@@ -30,6 +35,7 @@ export const createGroupsSlice: StateCreator<
   GroupsSlice
 > = (set, get) => ({
   groups: [],
+  pendingInvites: [],
 
   setGroups: (groups) => set({ groups }),
 
@@ -300,5 +306,136 @@ export const createGroupsSlice: StateCreator<
       console.error("Failed to join group:", err)
       return { success: false, message: err.message || "An error occurred while joining the group." }
     }
+  },
+
+  fetchPendingInvites: async () => {
+    const userSession = get().userSession
+    if (!userSession || !navigator.onLine) return
+    
+    try {
+      const { data, error } = await supabase
+        .from('group_invites')
+        .select(`
+          *,
+          group:groups(name),
+          from_user:users!group_invites_from_user_id_fkey(full_name, username)
+        `)
+        .eq('to_user_id', userSession.id)
+        .eq('status', 'pending')
+        
+      if (!error && data) {
+        set({ pendingInvites: data as any })
+      }
+    } catch (err) {
+      console.error("Failed to fetch invites", err)
+    }
+  },
+
+  sendGroupInvite: async (groupId, username) => {
+    const userSession = get().userSession
+    if (!userSession) return { success: false, message: "Must be logged in to invite." }
+    if (!navigator.onLine) return { success: false, message: "You are offline." }
+
+    try {
+      const { data: userData, error: userErr } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', username.trim().toLowerCase())
+        .single()
+        
+      if (userErr || !userData) {
+        return { success: false, message: "User not found." }
+      }
+      
+      if (userData.id === userSession.id) {
+        return { success: false, message: "You cannot invite yourself." }
+      }
+
+      const group = get().groups.find(g => g.id === groupId)
+      if (group?.members.some(m => m.userId === userData.id)) {
+        return { success: false, message: "User is already in this group." }
+      }
+      
+      const { error: inviteErr } = await supabase
+        .from('group_invites')
+        .insert({
+          group_id: groupId,
+          from_user_id: userSession.id,
+          to_user_id: userData.id
+        })
+        
+      if (inviteErr) {
+        if (inviteErr.code === '23505') {
+           return { success: false, message: "An invite is already pending for this user." }
+        }
+        throw inviteErr
+      }
+      
+      return { success: true, message: "Invitation sent!" }
+    } catch (err: any) {
+      console.error(err)
+      return { success: false, message: "Failed to send invitation." }
+    }
+  },
+
+  respondToInvite: async (inviteId, accept) => {
+     const userSession = get().userSession
+     if (!userSession) return { success: false, message: "Not logged in." }
+     
+     try {
+       const status = accept ? 'accepted' : 'declined'
+       const { error } = await supabase
+         .from('group_invites')
+         .update({ status })
+         .eq('id', inviteId)
+         .eq('to_user_id', userSession.id)
+         
+       if (error) throw error
+       
+       if (accept) {
+         const invite = get().pendingInvites.find(i => i.id === inviteId)
+         if (invite) {
+           const { data: groupData } = await supabase.from('groups').select('*').eq('id', invite.group_id).single()
+           if (groupData) {
+             const newMember: import('../lib/types').Person = {
+               id: crypto.randomUUID(),
+               name: userSession.full_name || userSession.username,
+               username: userSession.username,
+               userId: userSession.id
+             }
+             const updatedMembers = [...(groupData.members || []), newMember]
+             await supabase.from('groups').update({ members: updatedMembers }).eq('id', groupData.id)
+             
+             const formattedGroup = {
+               id: groupData.id,
+               name: groupData.name,
+               members: updatedMembers,
+               color: groupData.color,
+               createdAt: new Date(groupData.created_at).getTime(),
+               ownerId: groupData.user_id,
+               shareCode: groupData.share_code,
+               synced: true
+             }
+             
+             const existingGroups = get().groups
+             if (!existingGroups.find(g => g.id === formattedGroup.id)) {
+               const updated = [formattedGroup, ...existingGroups]
+               set({ groups: updated })
+               localStorage.setItem(`homiepay-saved-groups-${userSession.id}`, JSON.stringify(updated))
+             } else {
+               const updated = existingGroups.map(g => g.id === formattedGroup.id ? formattedGroup : g)
+               set({ groups: updated })
+               localStorage.setItem(`homiepay-saved-groups-${userSession.id}`, JSON.stringify(updated))
+             }
+           }
+         }
+       }
+       
+       set({ pendingInvites: get().pendingInvites.filter(i => i.id !== inviteId) })
+       return { success: true, message: accept ? "Joined group!" : "Invitation declined." }
+     } catch (err) {
+       console.error(err)
+       return { success: false, message: "Failed to respond to invitation." }
+     }
   }
 })

@@ -59,3 +59,19 @@ export interface SavedBill {
   clearedBy?: string[]
   creatorId?: string
 }
+
+export interface GroupInvite {
+  id: string
+  group_id: string
+  from_user_id: string
+  to_user_id: string
+  status: 'pending' | 'accepted' | 'declined'
+  created_at: string
+  group?: {
+    name: string
+  }
+  from_user?: {
+    full_name: string
+    username: string
+  }
+}

@@ -75,6 +75,9 @@ export const useStore = create<StoreState>()((set, get, api) => ({
 
     const userId = userSession.id
     
+    // Fetch pending invites
+    get().fetchPendingInvites()
+    
     // Get locally joined group IDs
     const storedJoinedKey = `homiepay-joined-group-ids-${userId}`
     const storedJoined = localStorage.getItem(storedJoinedKey)
