@@ -14,7 +14,7 @@ interface SavedBillsProps {
 export function SavedBills({ bills, onLoadBill, onDeleteBill }: SavedBillsProps) {
   if (bills.length === 0) {
     return (
-      <Card className="border-border/50 shadow-lg">
+      <Card className="w-[95vw] relative left-1/2 -translate-x-1/2 sm:w-full sm:left-auto sm:translate-x-0 border-border/50 shadow-lg">
         <CardContent className="p-8 text-center text-muted-foreground">
           <History className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p className="font-medium text-foreground">No saved bills yet</p>
@@ -35,7 +35,7 @@ export function SavedBills({ bills, onLoadBill, onDeleteBill }: SavedBillsProps)
   }
 
   return (
-    <Card className="border-border/50 shadow-lg">
+    <Card className="w-[95vw] relative left-1/2 -translate-x-1/2 sm:w-full sm:left-auto sm:translate-x-0 border-border/50 shadow-lg">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <History className="h-5 w-5 text-primary" />
