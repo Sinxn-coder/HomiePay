@@ -557,8 +557,6 @@ export function ExpenseSplitter({
                   bills={savedBills}
                   onLoadBill={handleLoadBill}
                   onDeleteBill={handleDeleteBill}
-                  onNewBill={handleNewBill}
-                  onAddSettlement={addSettlement}
                 />
               </div>
             )}
