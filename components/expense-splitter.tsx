@@ -706,6 +706,7 @@ export function ExpenseSplitter({
       )}
 
       {/* Footer Branding (Etriq) - Removed by request */}
+      <div className="h-24 md:h-8" />
 
       {/* PWA Floating Installation Popup & Steps */}
       {showPwaPopup && hasCompletedTutorial && (
