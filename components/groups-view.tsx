@@ -332,7 +332,7 @@ export function GroupsView({
       : []
 
     return (
-      <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
+      <div className="w-[95vw] relative left-1/2 -translate-x-1/2 sm:w-full sm:left-auto sm:translate-x-0 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
         {/* Header with Back button + Group Settings Menu */}
         <div className="flex items-center justify-between">
           <Button
