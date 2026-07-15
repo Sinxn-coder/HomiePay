@@ -242,17 +242,23 @@ export default function AdminPage() {
         <nav className="flex-1 py-6 flex flex-col gap-2">
           <button 
             onClick={() => setActiveTab("dashboard")}
-            className={`flex items-center px-5 py-3 mx-2 rounded-xl transition-colors cursor-pointer \${activeTab === "dashboard" ? "bg-emerald-600 text-white" : "hover:bg-slate-800 hover:text-white"}`}
+            className={`relative flex items-center px-5 py-3 mx-2 rounded-xl transition-all duration-200 cursor-pointer overflow-hidden group/nav ${activeTab === "dashboard" ? "bg-emerald-600/10 text-emerald-500" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
           >
-            <LayoutDashboard className="h-5 w-5 shrink-0" />
+            {activeTab === "dashboard" && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-emerald-500 rounded-r-full" />
+            )}
+            <LayoutDashboard className={`h-5 w-5 shrink-0 transition-colors ${activeTab === "dashboard" ? "text-emerald-500" : "group-hover/nav:text-white"}`} />
             <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Dashboard</span>
           </button>
           
           <button 
             onClick={() => setActiveTab("users")}
-            className={`flex items-center px-5 py-3 mx-2 rounded-xl transition-colors cursor-pointer \${activeTab === "users" ? "bg-emerald-600 text-white" : "hover:bg-slate-800 hover:text-white"}`}
+            className={`relative flex items-center px-5 py-3 mx-2 rounded-xl transition-all duration-200 cursor-pointer overflow-hidden group/nav ${activeTab === "users" ? "bg-emerald-600/10 text-emerald-500" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
           >
-            <Users className="h-5 w-5 shrink-0" />
+            {activeTab === "users" && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-emerald-500 rounded-r-full" />
+            )}
+            <Users className={`h-5 w-5 shrink-0 transition-colors ${activeTab === "users" ? "text-emerald-500" : "group-hover/nav:text-white"}`} />
             <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Users Management</span>
           </button>
         </nav>
