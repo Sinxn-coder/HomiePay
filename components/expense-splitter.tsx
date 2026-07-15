@@ -678,26 +678,16 @@ export function ExpenseSplitter({
         />
       )}
 
-      {/* Footer Branding (Nexlyte) */}
+      {/* Footer Branding (Etriq) */}
       <footer className="w-full py-8 border-t border-border/10 flex items-center justify-center mt-8 pb-24 md:pb-8">
         <a 
-          href="https://sinxn-coder.github.io/Nexlyte/" 
+          href="https://www.etriq.online" 
           target="_blank" 
           rel="noopener noreferrer"
           className="flex flex-row items-center justify-center gap-2 hover:opacity-80 transition-opacity cursor-pointer group"
         >
           <span className="text-[10px] text-muted-foreground tracking-wider uppercase font-semibold opacity-75 group-hover:text-foreground transition-colors">Powered by</span>
-          <img 
-            src="nexlytelight.png" 
-            alt="Nexlyte Light" 
-            className="h-4.5 w-auto object-contain dark:hidden group-hover:scale-105 transition-transform duration-200" 
-          />
-          <img 
-            src="nexlytedark.png" 
-            alt="Nexlyte Dark" 
-            className="h-4.5 w-auto object-contain hidden dark:block group-hover:scale-105 transition-transform duration-200" 
-          />
-          <span className="text-xs font-bold tracking-tight text-foreground/80 group-hover:text-emerald-600 transition-colors duration-200">Nexlyte</span>
+          <span className="text-sm font-black tracking-tight text-foreground/80 group-hover:text-emerald-600 transition-colors duration-200">Etriq</span>
         </a>
       </footer>
 
