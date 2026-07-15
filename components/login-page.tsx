@@ -244,7 +244,7 @@ ${uname}`
         // LOGIN FLOW
         const { data: user, error: loginErr } = await supabase
           .from("users")
-          .select("id, username, password_hash, full_name")
+          .select("id, username, password_hash, full_name, is_banned")
           .eq("username", cleanUsername)
           .maybeSingle()
 
@@ -254,6 +254,12 @@ ${uname}`
           setLoginFailed(true)
           setFailedUsername(cleanUsername)
           setErrorMsg("Wrong password. Please check and try again.")
+          setIsLoading(false)
+          return
+        }
+
+        if (user.is_banned) {
+          setErrorMsg("This account has been suspended. Please contact support.")
           setIsLoading(false)
           return
         }
