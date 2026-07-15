@@ -55,11 +55,9 @@ export default function Error({ error, reset }: ErrorProps) {
           <AlertTriangle className="h-8 w-8 text-destructive animate-bounce" />
         </div>
         
-        <div className="space-y-2">
-          <h2 className="text-xl font-bold text-foreground">Something went wrong!</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            An unexpected error occurred. This might be due to outdated browser cache or corrupted local storage.
-          </p>
+        <div className="space-y-2 text-left bg-slate-100 dark:bg-slate-900 p-3 rounded-lg overflow-auto max-h-32 text-xs">
+          <p className="font-mono text-red-600 dark:text-red-400 break-all">{error.message}</p>
+          {error.digest && <p className="font-mono text-slate-500 mt-1">Digest: {error.digest}</p>}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
