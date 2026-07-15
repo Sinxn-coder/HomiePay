@@ -1090,12 +1090,7 @@ export function GroupsView({
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
-                      style={{ backgroundColor: group.color }}
-                    >
-                      {group.name.charAt(0).toUpperCase()}
-                    </div>
+
                     <div>
                       {editingGroupId === group.id ? (
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
