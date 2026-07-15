@@ -1082,15 +1082,18 @@ export function GroupsView({
               >
                 {/* Group Header */}
                 <div
-                  className={`p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors ${
-                    expandedGroupId === group.id ? "rounded-t-xl" : "rounded-xl"
-                  }`}
+                  className="p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors rounded-xl"
                   onClick={() => {
                     setActiveDetailGroupId(group.id)
                   }}
                 >
                   <div className="flex items-center gap-3">
-
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
+                      style={{ backgroundColor: group.color }}
+                    >
+                      {group.name.charAt(0).toUpperCase()}
+                    </div>
                     <div>
                       {editingGroupId === group.id ? (
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
@@ -1225,16 +1228,12 @@ export function GroupsView({
                       )}
                     </div>
 
-                    <ChevronRight
-                      className={`h-5 w-5 text-muted-foreground transition-transform ${
-                        expandedGroupId === group.id ? "rotate-90" : ""
-                      }`}
-                    />
+                    <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform" />
                   </div>
                 </div>
 
                 {/* Expanded Group Content */}
-                {expandedGroupId === group.id && (
+                {false && (
                   <div className="px-3 pb-3 pt-0 border-t border-border/50">
                     {/* Members */}
                     <div className="mt-3 space-y-2">
