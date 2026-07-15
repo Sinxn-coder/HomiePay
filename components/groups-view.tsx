@@ -136,7 +136,12 @@ export function GroupsView({
     setIsInviting(true)
     const { success, message } = await onSendInvite(groupId, inviteUsername)
     setIsInviting(false)
+    
     if (success) {
+      setSentInvites(prev => ({
+        ...prev, 
+        [groupId]: [...(prev[groupId] || []), inviteUsername.trim().toLowerCase()]
+      }))
       toast.success(message)
       setInviteUsername("")
     } else {
@@ -579,10 +584,17 @@ export function GroupsView({
                       value={inviteUsername}
                       onChange={(e) => setInviteUsername(e.target.value)}
                       className="h-9 flex-1"
-                      onKeyDown={(e) => { if (e.key === "Enter") handleInviteUser(activeGroup.id) }}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !sentInvites[activeGroup.id]?.includes(inviteUsername.trim().toLowerCase())) handleInviteUser(activeGroup.id) }}
                     />
-                    <Button size="sm" className="h-9 shrink-0 whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => handleInviteUser(activeGroup.id)} disabled={!inviteUsername.trim() || isInviting || !onSendInvite}>
-                      {isInviting ? "..." : "Invite"}
+                    <Button 
+                      size="sm" 
+                      className="h-9 shrink-0 whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white disabled:bg-slate-300 disabled:text-slate-500" 
+                      onClick={() => handleInviteUser(activeGroup.id)} 
+                      disabled={!inviteUsername.trim() || isInviting || !onSendInvite || sentInvites[activeGroup.id]?.includes(inviteUsername.trim().toLowerCase())}
+                    >
+                      {sentInvites[activeGroup.id]?.includes(inviteUsername.trim().toLowerCase()) 
+                        ? "Waiting" 
+                        : isInviting ? "..." : "Invite"}
                     </Button>
                   </div>
                 )}
