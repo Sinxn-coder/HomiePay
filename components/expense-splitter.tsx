@@ -688,13 +688,13 @@ export function ExpenseSplitter({
         >
           <span className="text-[10px] text-muted-foreground tracking-wider uppercase font-semibold opacity-75 group-hover:text-foreground transition-colors">Powered by</span>
           <img 
-            src="etriqlogo.webp" 
-            alt="Etriq Light" 
+            src="etriqlogodark.png" 
+            alt="Etriq Light Mode" 
             className="h-5 w-auto object-contain dark:hidden group-hover:scale-105 transition-transform duration-200" 
           />
           <img 
-            src="etriqlogodark.png" 
-            alt="Etriq Dark" 
+            src="etriqlogo.webp" 
+            alt="Etriq Dark Mode" 
             className="h-5 w-auto object-contain hidden dark:block group-hover:scale-105 transition-transform duration-200" 
           />
           <span className="text-sm font-black tracking-tight text-foreground/80 group-hover:text-emerald-600 transition-colors duration-200">Etriq</span>
