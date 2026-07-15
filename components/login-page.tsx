@@ -12,7 +12,7 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onSuccess }: LoginPageProps) {
-  const [activeTab, setActiveTab] = useState<"login" | "register">("login")
+  const [activeTab, setActiveTab] = useState<"login" | "register" | "forgot">("login")
   const [registerStep, setRegisterStep] = useState<1 | 2>(1)
   const [fullName, setFullName] = useState("")
   const [username, setUsername] = useState("")
@@ -29,6 +29,12 @@ export function LoginPage({ onSuccess }: LoginPageProps) {
   // Track failed login to show "Forgot password?" option
   const [loginFailed, setLoginFailed] = useState(false)
   const [failedUsername, setFailedUsername] = useState("")
+
+  // Forgot password state
+  const [forgotSecurityQuestion, setForgotSecurityQuestion] = useState(SECURITY_QUESTIONS[0])
+  const [forgotSecurityAnswer, setForgotSecurityAnswer] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [forgotFailed, setForgotFailed] = useState(false)
 
   // Secure browser-native SHA-256 password hashing
   const hashText = async (text: string): Promise<string> => {
@@ -63,6 +69,7 @@ ${uname}`
     setErrorMsg("")
     setSuccessMsg("")
     setLoginFailed(false)
+    setForgotFailed(false)
 
     // Internet connection check for authentication
     if (typeof window !== "undefined" && !navigator.onLine) {
@@ -147,6 +154,54 @@ ${uname}`
         setTimeout(() => {
           onSuccess(newUser)
         }, 800)
+      } else if (activeTab === "forgot") {
+        // FORGOT PASSWORD FLOW
+        const cleanAnswer = forgotSecurityAnswer.trim()
+        if (!cleanAnswer) {
+          setErrorMsg("Please provide an answer to your security question.")
+          setIsLoading(false)
+          return
+        }
+
+        const { data: user, error: fetchErr } = await supabase
+          .from("users")
+          .select("id, security_question, security_answer_hash")
+          .eq("username", cleanUsername)
+          .maybeSingle()
+        
+        if (fetchErr) throw fetchErr
+
+        if (!user) {
+          setForgotFailed(true)
+          setFailedUsername(cleanUsername)
+          setErrorMsg("Incorrect username or security answer.")
+          setIsLoading(false)
+          return
+        }
+
+        const hashedAnswer = await hashText(cleanAnswer.toLowerCase())
+
+        if (user.security_question !== forgotSecurityQuestion || user.security_answer_hash !== hashedAnswer) {
+          setForgotFailed(true)
+          setFailedUsername(cleanUsername)
+          setErrorMsg("Incorrect security answer.")
+          setIsLoading(false)
+          return
+        }
+
+        // Answer is correct! Reset password
+        const { error: updateErr } = await supabase
+          .from("users")
+          .update({ password_hash: hashedPassword })
+          .eq("id", user.id)
+
+        if (updateErr) throw updateErr
+
+        setSuccessMsg("Password reset successfully! You can now login.")
+        setTimeout(() => {
+          setActiveTab("login")
+          setPassword("") // clear password so they have to type it again
+        }, 1500)
       } else {
         // LOGIN FLOW
         const { data: user, error: loginErr } = await supabase
@@ -196,51 +251,54 @@ ${uname}`
             <Wallet className="h-6 w-6 text-white stroke-[2.5]" />
           </div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-            {activeTab === "login" ? "Welcome back" : "Create your account"}
+            {activeTab === "login" ? "Welcome back" : activeTab === "forgot" ? "Reset Password" : "Create your account"}
           </h2>
           <p className="text-xs text-slate-500 mt-1 font-medium max-w-xs">
             {activeTab === "login" 
               ? "Access your group settlements and split bills instantly" 
+              : activeTab === "forgot"
+              ? "Answer your security question to reset your password"
               : "Register a unique username to store splits securely in the cloud"}
           </p>
         </div>
 
-        {/* Custom HSL Tab Switcher */}
-        <div className="grid grid-cols-2 p-1.5 bg-slate-100/80 rounded-xl mb-6 border border-slate-200/50">
-          <button
-            onClick={() => {
-              setActiveTab("login")
-              setRegisterStep(1)
-              setErrorMsg("")
-              setSuccessMsg("")
-              setLoginFailed(false)
-            }}
-            className={`py-2 text-xs font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
-              activeTab === "login"
-                ? "bg-white text-emerald-700 shadow-sm border border-slate-200/30"
-                : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("register")
-              setRegisterStep(1)
-              setErrorMsg("")
-              setSuccessMsg("")
-              setLoginFailed(false)
-            }}
-            className={`py-2 text-xs font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
-              activeTab === "register"
-                ? "bg-white text-emerald-700 shadow-sm border border-slate-200/30"
-                : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
-
+        {activeTab !== "forgot" && (
+          <div className="grid grid-cols-2 p-1.5 bg-slate-100/80 rounded-xl mb-6 border border-slate-200/50">
+            {/* Custom HSL Tab Switcher */}
+            <button
+              onClick={() => {
+                setActiveTab("login")
+                setRegisterStep(1)
+                setErrorMsg("")
+                setSuccessMsg("")
+                setLoginFailed(false)
+              }}
+              className={`py-2 text-xs font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+                activeTab === "login"
+                  ? "bg-white text-emerald-700 shadow-sm border border-slate-200/30"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("register")
+                setRegisterStep(1)
+                setErrorMsg("")
+                setSuccessMsg("")
+                setLoginFailed(false)
+              }}
+              className={`py-2 text-xs font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+                activeTab === "register"
+                  ? "bg-white text-emerald-700 shadow-sm border border-slate-200/30"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
         {/* Alert/Status Banners */}
         {errorMsg && (
           <div className="mb-5 space-y-2 animate-in fade-in duration-300">
@@ -252,10 +310,33 @@ ${uname}`
             {/* Forgot Password link — only shown after a failed login */}
             {loginFailed && activeTab === "login" && (
               <div className="flex items-center gap-2 p-3.5 bg-amber-50 border border-amber-200 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                <ShieldCheck className="h-4 w-4 shrink-0 text-amber-600" />
+                <div className="flex-1 flex items-center justify-between">
+                  <p className="text-[10px] text-amber-700 font-semibold leading-snug">
+                    Forgot your password?
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("forgot")
+                      setErrorMsg("")
+                      setLoginFailed(false)
+                    }}
+                    className="text-[10px] font-extrabold text-emerald-600 hover:text-emerald-700 uppercase tracking-wider cursor-pointer bg-white px-3 py-1.5 rounded-lg shadow-sm border border-amber-200/50"
+                  >
+                    Reset Password
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Forgot Password fallback email link — shown after failed reset attempt */}
+            {forgotFailed && activeTab === "forgot" && (
+              <div className="flex items-center gap-2 p-3.5 bg-amber-50 border border-amber-200 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
                 <Mail className="h-4 w-4 shrink-0 text-amber-600" />
                 <div className="flex-1">
                   <p className="text-[10px] text-amber-700 font-semibold leading-snug">
-                    Forgot your password?
+                    Still can't log in?
                   </p>
                   <a
                     href={buildForgotPasswordLink(failedUsername)}
@@ -302,7 +383,7 @@ ${uname}`
             </div>
           )}
 
-          {(activeTab === "login" || (activeTab === "register" && registerStep === 1)) && (
+          {(activeTab === "login" || activeTab === "forgot" || (activeTab === "register" && registerStep === 1)) && (
             <>
 
           <div className="space-y-1.5">
@@ -317,7 +398,8 @@ ${uname}`
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ""))
-                  setLoginFailed(false) // reset forgot link if they re-type username
+                  setLoginFailed(false)
+                  setForgotFailed(false)
                 }}
                 disabled={isLoading}
                 required
@@ -328,7 +410,7 @@ ${uname}`
 
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
-              Password
+              {activeTab === "forgot" ? "New Password" : "Password"}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
@@ -351,6 +433,45 @@ ${uname}`
             </div>
           </div>
           </>
+          )}
+
+          {/* Security Question section — forgot password */}
+          {activeTab === "forgot" && (
+            <div className="space-y-3 pt-1">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+                  Select Your Security Question
+                </label>
+                <div className="relative">
+                  <select
+                    value={forgotSecurityQuestion}
+                    onChange={(e) => setForgotSecurityQuestion(e.target.value)}
+                    disabled={isLoading}
+                    className="w-full appearance-none pl-4 pr-9 py-3.5 text-xs font-semibold text-slate-700 rounded-xl border border-slate-200 bg-slate-50/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent cursor-pointer transition-all"
+                  >
+                    {SECURITY_QUESTIONS.map((q) => (
+                      <option key={q} value={q}>{q}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+                  Your Answer
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Type your answer..."
+                  value={forgotSecurityAnswer}
+                  onChange={(e) => setForgotSecurityAnswer(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  autoComplete="off"
+                  className="py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                />
+              </div>
+            </div>
           )}
 
           {/* Security Question section — registration only */}
@@ -439,20 +560,37 @@ ${uname}`
               </Button>
             </div>
           ) : (
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl mt-3 flex items-center justify-center gap-2 cursor-pointer transition-all border border-slate-800"
-            >
-              {isLoading ? (
-                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  {activeTab === "login" ? "Sign In" : "Next"}
-                  <ArrowRight className="h-4 w-4 stroke-[2.5]" />
-                </>
+            <div className="flex gap-2 mt-3">
+              {activeTab === "forgot" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isLoading}
+                  onClick={() => {
+                    setActiveTab("login")
+                    setForgotFailed(false)
+                    setErrorMsg("")
+                  }}
+                  className="py-6 rounded-xl border-slate-200 text-slate-600 font-extrabold text-xs tracking-wider uppercase flex-1"
+                >
+                  Back
+                </Button>
               )}
-            </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className={`py-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all border border-slate-800 ${activeTab === "forgot" ? "flex-[2]" : "w-full"}`}
+              >
+                {isLoading ? (
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    {activeTab === "login" ? "Sign In" : activeTab === "forgot" ? "Reset Password" : "Next"}
+                    <ArrowRight className="h-4 w-4 stroke-[2.5]" />
+                  </>
+                )}
+              </Button>
+            </div>
           )}
         </form>
 
