@@ -170,11 +170,11 @@ function GlassPill({ activeIndex, tabCount, dragOffset = 0, isDragging = false, 
     const slotCentreX = -viewport.width / 2 + padWorld + (activeIndex + 0.5) * tabStep
     const targetX     = slotCentreX + (isDragging ? dragOffset * pxToWorld : 0)
 
-    // Smooth easing — snap faster while dragging
+    // Smooth easing — tight tracking while dragging, snappy spring on release
     easing.damp3(
       meshRef.current.position,
       [targetX, 0, 0],
-      isDragging ? 0.8 : 0.14,
+      isDragging ? 0.05 : 0.08,
       delta
     )
 

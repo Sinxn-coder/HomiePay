@@ -27,7 +27,7 @@ export function AddProductsStep({
 }: AddProductsStepProps) {
   const [newName, setNewName] = useState("")
   const [newPrice, setNewPrice] = useState("")
-  const [newQuantity, setNewQuantity] = useState("1")
+  const [newQuantity, setNewQuantity] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState("")
   const [editingPrice, setEditingPrice] = useState("")
@@ -43,7 +43,7 @@ export function AddProductsStep({
         addProduct(newName, price, quantity)
         setNewName("")
         setNewPrice("")
-        setNewQuantity("1")
+        setNewQuantity("")
         setIsSheetOpen(false)
       }
     }

@@ -138,7 +138,6 @@
   width: calc(100% - 28px);
   height: 72px;
   z-index: 1000;
-  display: flex;
   align-items: center;
   justify-content: space-around;
   padding: 0 6px;

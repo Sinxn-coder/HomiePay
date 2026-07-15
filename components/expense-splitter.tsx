@@ -8,6 +8,7 @@ import { AddProductsStep } from "@/components/steps/add-products-step"
 import { AssignProductsStep } from "@/components/steps/assign-products-step"
 import { SelectPayerStep } from "@/components/steps/select-payer-step"
 import { FinalCalculationStep } from "@/components/steps/final-calculation-step"
+import { StartSplitStep } from "@/components/steps/start-split-step"
 import { SavedBills } from "@/components/saved-bills"
 import { GroupsView } from "@/components/groups-view"
 import { ProfileView } from "@/components/profile-view"
@@ -32,13 +33,13 @@ export function ExpenseSplitter({
   userSession: { id: string; username: string; full_name: string },
   onProfileUpdate: (session: { id: string; username: string; full_name: string }) => void
 }) {
-  const [activeTab, setActiveTab] = useState<"groups" | "splitter" | "history" | "profile">("groups")
+  const [activeTab, setActiveTab] = useState<"splitter" | "groups" | "history" | "profile">("splitter")
   const navSwipeRef = useRef({ startX: 0, active: false })
-  const navTabs = ["groups", "splitter", "history", "profile"] as const
+  const navTabs = ["splitter", "groups", "history", "profile"] as const
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [isPressing, setIsPressing] = useState(false)
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(0)
   const [installPrompt, setInstallPrompt] = useState<any>(null)
   const [showPwaPopup, setShowPwaPopup] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
@@ -455,11 +456,20 @@ export function ExpenseSplitter({
 
             {/* SPLIT BILL TAB */}
             {activeTab === "splitter" && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300">
+              <div className="w-[95vw] relative left-1/2 -translate-x-1/2 md:w-full md:left-auto md:translate-x-0 space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300">
                 {/* Step Indicator */}
-                <StepIndicator currentStep={currentStep} totalSteps={5} stepLabels={STEP_LABELS} />
+                {currentStep > 0 && <StepIndicator currentStep={currentStep} totalSteps={5} stepLabels={STEP_LABELS} />}
 
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  {currentStep === 0 && (
+                    <StartSplitStep 
+                      onStart={() => {
+                        resetAll()
+                        setCurrentStep(1)
+                      }} 
+                    />
+                  )}
+
                   {currentStep === 1 && (
                     <AddFriendsStep
                       people={people}
@@ -561,7 +571,7 @@ export function ExpenseSplitter({
 
       {/* Mobile Floating Bottom Tab Navigation (Fixed bottom) */}
       <div 
-        className="md:hidden ios-nav-container touch-pan-y"
+        className="md:hidden flex ios-nav-container touch-pan-y"
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
           navSwipeRef.current = { startX: e.clientX, active: true };
@@ -619,19 +629,19 @@ export function ExpenseSplitter({
         />
         
         <button
-          onClick={() => setActiveTab("groups")}
-          className={`ios-nav-item ${activeTab === "groups" ? "active" : ""}`}
-        >
-          <Users className="ios-nav-icon" />
-          <span className="ios-nav-label">Groups</span>
-        </button>
-
-        <button
           onClick={() => setActiveTab("splitter")}
           className={`ios-nav-item ${activeTab === "splitter" ? "active" : ""}`}
         >
           <Receipt className="ios-nav-icon" />
           <span className="ios-nav-label">Split Bill</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("groups")}
+          className={`ios-nav-item ${activeTab === "groups" ? "active" : ""}`}
+        >
+          <Users className="ios-nav-icon" />
+          <span className="ios-nav-label">Groups</span>
         </button>
 
         <button

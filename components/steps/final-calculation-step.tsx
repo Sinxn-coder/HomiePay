@@ -412,18 +412,10 @@ export function FinalCalculationStep({
                     className="flex items-center justify-between p-3 rounded-lg bg-background border border-border"
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                        <span className="text-xs font-semibold">
-                          {fromPerson.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
+
                       <span className="font-medium">{fromPerson.name}</span>
                       <ArrowRight className="h-4 w-4 text-muted-foreground animate-pulse" />
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span className="text-xs font-semibold text-primary">
-                          {toPerson.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
+
                       <span className="font-medium text-primary">{toPerson.name}</span>
                     </div>
                     <span className="flex items-center font-bold text-primary">
@@ -579,16 +571,14 @@ export function FinalCalculationStep({
           </div>
         )}
 
-        <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-between border-t border-border/40">
-          <Button variant="outline" onClick={onBack}>
+        <div className="pt-4 flex flex-row gap-3 justify-between border-t border-border/40">
+          <Button variant="outline" onClick={onBack} className="flex-1">
             Back
           </Button>
-          <div className="flex gap-2">
-            <Button variant="destructive" onClick={onReset} className="flex items-center gap-2">
-              <RotateCcw className="h-4 w-4" />
-              Done
-            </Button>
-          </div>
+          <Button variant="destructive" onClick={onReset} className="flex-1 flex items-center justify-center gap-2">
+            <RotateCcw className="h-4 w-4" />
+            Done
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -22,6 +23,11 @@ export function PremiumModal({
   icon,
 }: PremiumModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
@@ -44,20 +50,20 @@ export function PremiumModal({
     return () => window.removeEventListener("keydown", handleEscape)
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
+  if (!isOpen || !mounted) return null
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center sm:p-6">
       {/* Premium Glassmorphism Backdrop */}
       <div
         className="absolute inset-0 bg-black/45 backdrop-blur-md transition-opacity duration-300 animate-in fade-in"
         onClick={onClose}
       />
 
-      {/* Floating Card Popup */}
+      {/* Floating Card Popup / Top Sheet */}
       <div
         ref={modalRef}
-        className="relative w-full max-w-lg bg-card border border-border/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 transform animate-in zoom-in-95 slide-in-from-bottom-8"
+        className="relative w-full max-w-lg bg-card border-b sm:border border-border/80 rounded-b-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 transform animate-in slide-in-from-top-full sm:zoom-in-95 sm:slide-in-from-bottom-8"
       >
         {/* Color Accent Bar */}
         <div className="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600" />
@@ -92,6 +98,7 @@ export function PremiumModal({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

@@ -146,19 +146,19 @@ export function SelectPayerStep({
 
       <CardContent className="pt-6 space-y-6">
         {/* Grand Total Indicator */}
-        <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+        <div className="p-3 sm:p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-between gap-2 overflow-hidden">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
               <Users className="h-4 w-4 text-emerald-500" />
             </div>
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Bill Amount</span>
-              <p className="text-lg font-extrabold text-foreground">Rs. {grandTotal.toFixed(2)}</p>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider whitespace-nowrap block truncate">Total Bill Amount</span>
+              <p className="text-base sm:text-lg font-extrabold text-foreground whitespace-nowrap truncate">Rs. {grandTotal.toFixed(2)}</p>
             </div>
           </div>
 
           {/* Status Badge */}
-          <div className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 ${isFullyPaid
+          <div className={`shrink-0 whitespace-nowrap px-2 py-1 sm:px-2.5 rounded-full text-[10px] sm:text-xs font-bold transition-all duration-300 ${isFullyPaid
               ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
               : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
             }`}>

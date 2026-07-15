@@ -72,38 +72,6 @@ export default function Home() {
         }`}
         onAnimationEnd={() => setAnimationDone(true)}
       >
-        {/* Responsive Premium Top Navigation Bar */}
-        <div className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-3.5 px-4 md:px-6 flex justify-between items-center shadow-sm z-30 transition-colors duration-300">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/30 shadow-sm">
-              <Wallet className="h-4 w-4 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
-            </div>
-            <span className="text-xs font-black text-slate-800 dark:text-slate-100 tracking-wider">HOMIEPAY PRO</span>
-          </div>
-
-          <div className="flex items-center gap-3.5">
-            {userSession && (
-              <div className="hidden sm:flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-xl">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">
-                  Hi, <span className="text-slate-800 dark:text-slate-200 font-extrabold">{userSession.full_name}</span>
-                </span>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => {
-                  setIsExiting(false)
-                  setIsStarted(false)
-                }}
-                className="text-[10px] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-extrabold px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-slate-350 dark:hover:border-slate-700 transition-all cursor-pointer uppercase tracking-wider"
-              >
-                ← Back
-              </button>
-            </div>
-          </div>
-        </div>
 
         {/* Dynamic Main Workspace Container */}
         <div className="flex-1 max-w-5xl w-full mx-auto p-4 md:py-8 flex flex-col justify-center">
