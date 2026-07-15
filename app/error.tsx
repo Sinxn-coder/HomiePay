@@ -13,18 +13,39 @@ export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     // Log the error to standard error logs
     console.error("Unhandled PWA Runtime Error:", error)
+    
+    // Auto-recover on first error
+    const hasAutoReloaded = sessionStorage.getItem('homiepay_auto_reloaded')
+    if (!hasAutoReloaded) {
+      sessionStorage.setItem('homiepay_auto_reloaded', 'true')
+      
+      // Clear SW caches to fix 404s for old chunks
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => caches.delete(name))
+        }).catch(() => {})
+      }
+      
+      // We don't want to wipe localStorage automatically unless necessary, 
+      // but if it's a breaking schema change, we might need to.
+      // Let's just force a hard reload first to fetch new JS bundles.
+      window.location.replace("/?reset=" + Date.now())
+    }
   }, [error])
 
   const handleResetData = () => {
     try {
       localStorage.clear()
       sessionStorage.clear()
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => caches.delete(name))
+        })
+      }
     } catch (e) {
       // storage might be blocked in some browsers
     }
-    // Use replace() so the error page is removed from history,
-    // and add a cache-busting param to force a fresh page load.
-    window.location.replace("/?reset=" + Date.now())
+    window.location.replace("/")
   }
 
   return (
