@@ -13,6 +13,7 @@ interface LoginPageProps {
 
 export function LoginPage({ onSuccess }: LoginPageProps) {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login")
+  const [registerStep, setRegisterStep] = useState<1 | 2>(1)
   const [fullName, setFullName] = useState("")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -66,6 +67,12 @@ ${uname}`
     // Internet connection check for authentication
     if (typeof window !== "undefined" && !navigator.onLine) {
       setErrorMsg("An active internet connection is required to login or register. Please connect to the internet and try again.")
+      return
+    }
+
+    // Advance to step 2 if registering and on step 1
+    if (activeTab === "register" && registerStep === 1) {
+      setRegisterStep(2)
       return
     }
 
@@ -203,6 +210,7 @@ ${uname}`
           <button
             onClick={() => {
               setActiveTab("login")
+              setRegisterStep(1)
               setErrorMsg("")
               setSuccessMsg("")
               setLoginFailed(false)
@@ -218,6 +226,7 @@ ${uname}`
           <button
             onClick={() => {
               setActiveTab("register")
+              setRegisterStep(1)
               setErrorMsg("")
               setSuccessMsg("")
               setLoginFailed(false)
@@ -273,7 +282,7 @@ ${uname}`
 
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {activeTab === "register" && (
+          {activeTab === "register" && registerStep === 1 && (
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
                 Full Name
@@ -292,6 +301,9 @@ ${uname}`
               </div>
             </div>
           )}
+
+          {(activeTab === "login" || (activeTab === "register" && registerStep === 1)) && (
+            <>
 
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
@@ -338,9 +350,11 @@ ${uname}`
               </button>
             </div>
           </div>
+          </>
+          )}
 
           {/* Security Question section — registration only */}
-          {activeTab === "register" && (
+          {activeTab === "register" && registerStep === 2 && (
             <div className="space-y-3 pt-1">
               {/* Divider with label */}
               <div className="flex items-center gap-2">
@@ -398,20 +412,48 @@ ${uname}`
             </div>
           )}
 
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl mt-3 flex items-center justify-center gap-2 cursor-pointer transition-all border border-slate-800"
-          >
-            {isLoading ? (
-              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                {activeTab === "login" ? "Sign In" : "Register Account"}
-                <ArrowRight className="h-4 w-4 stroke-[2.5]" />
-              </>
-            )}
-          </Button>
+          {activeTab === "register" && registerStep === 2 ? (
+            <div className="flex gap-2 mt-3">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isLoading}
+                onClick={() => setRegisterStep(1)}
+                className="py-6 rounded-xl border-slate-200 text-slate-600 font-extrabold text-xs tracking-wider uppercase flex-1"
+              >
+                Back
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="py-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all border border-slate-800 flex-[2]"
+              >
+                {isLoading ? (
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Register Account
+                    <ArrowRight className="h-4 w-4 stroke-[2.5]" />
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl mt-3 flex items-center justify-center gap-2 cursor-pointer transition-all border border-slate-800"
+            >
+              {isLoading ? (
+                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  {activeTab === "login" ? "Sign In" : "Next"}
+                  <ArrowRight className="h-4 w-4 stroke-[2.5]" />
+                </>
+              )}
+            </Button>
+          )}
         </form>
 
       </div>
