@@ -687,6 +687,11 @@ export function ExpenseSplitter({
           className="flex flex-row items-center justify-center gap-2 hover:opacity-80 transition-opacity cursor-pointer group"
         >
           <span className="text-[10px] text-muted-foreground tracking-wider uppercase font-semibold opacity-75 group-hover:text-foreground transition-colors">Powered by</span>
+          <img 
+            src="etriqlogo.webp" 
+            alt="Etriq" 
+            className="h-5 w-auto object-contain group-hover:scale-105 transition-transform duration-200" 
+          />
           <span className="text-sm font-black tracking-tight text-foreground/80 group-hover:text-emerald-600 transition-colors duration-200">Etriq</span>
         </a>
       </footer>
