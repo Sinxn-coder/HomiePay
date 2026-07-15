@@ -31,9 +31,13 @@ export function LoginPage({ onSuccess }: LoginPageProps) {
   const [failedUsername, setFailedUsername] = useState("")
 
   // Forgot password state
+  // Forgot password state
+  const [forgotStep, setForgotStep] = useState<1 | 2>(1)
   const [forgotSecurityQuestion, setForgotSecurityQuestion] = useState(SECURITY_QUESTIONS[0])
   const [forgotSecurityAnswer, setForgotSecurityAnswer] = useState("")
   const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [verifiedUserId, setVerifiedUserId] = useState<string | null>(null)
   const [forgotFailed, setForgotFailed] = useState(false)
 
   // Secure browser-native SHA-256 password hashing
@@ -156,52 +160,84 @@ ${uname}`
         }, 800)
       } else if (activeTab === "forgot") {
         // FORGOT PASSWORD FLOW
-        const cleanAnswer = forgotSecurityAnswer.trim()
-        if (!cleanAnswer) {
-          setErrorMsg("Please provide an answer to your security question.")
+        if (forgotStep === 1) {
+          const cleanAnswer = forgotSecurityAnswer.trim()
+          if (!cleanAnswer) {
+            setErrorMsg("Please provide an answer to your security question.")
+            setIsLoading(false)
+            return
+          }
+
+          const { data: user, error: fetchErr } = await supabase
+            .from("users")
+            .select("id, security_question, security_answer_hash")
+            .eq("username", cleanUsername)
+            .maybeSingle()
+          
+          if (fetchErr) throw fetchErr
+
+          if (!user) {
+            setForgotFailed(true)
+            setFailedUsername(cleanUsername)
+            setErrorMsg("Incorrect username or security answer.")
+            setIsLoading(false)
+            return
+          }
+
+          const hashedAnswer = await hashText(cleanAnswer.toLowerCase())
+
+          if (user.security_question !== forgotSecurityQuestion || user.security_answer_hash !== hashedAnswer) {
+            setForgotFailed(true)
+            setFailedUsername(cleanUsername)
+            setErrorMsg("Incorrect security answer.")
+            setIsLoading(false)
+            return
+          }
+
+          // Answer is correct! Move to step 2
+          setVerifiedUserId(user.id)
+          setForgotStep(2)
+          setErrorMsg("")
           setIsLoading(false)
           return
+        } else if (forgotStep === 2) {
+          if (!newPassword || newPassword.length < 6) {
+            setErrorMsg("New password must be at least 6 characters long.")
+            setIsLoading(false)
+            return
+          }
+          if (newPassword !== confirmPassword) {
+            setErrorMsg("Passwords do not match.")
+            setIsLoading(false)
+            return
+          }
+
+          if (!verifiedUserId) {
+            setErrorMsg("Verification lost. Please try again.")
+            setForgotStep(1)
+            setIsLoading(false)
+            return
+          }
+
+          const hashedNewPassword = await hashText(newPassword)
+
+          const { error: updateErr } = await supabase
+            .from("users")
+            .update({ password_hash: hashedNewPassword })
+            .eq("id", verifiedUserId)
+
+          if (updateErr) throw updateErr
+
+          setSuccessMsg("Password reset successfully! You can now login.")
+          setTimeout(() => {
+            setActiveTab("login")
+            setForgotStep(1)
+            setNewPassword("")
+            setConfirmPassword("")
+            setForgotSecurityAnswer("")
+            setVerifiedUserId(null)
+          }, 1500)
         }
-
-        const { data: user, error: fetchErr } = await supabase
-          .from("users")
-          .select("id, security_question, security_answer_hash")
-          .eq("username", cleanUsername)
-          .maybeSingle()
-        
-        if (fetchErr) throw fetchErr
-
-        if (!user) {
-          setForgotFailed(true)
-          setFailedUsername(cleanUsername)
-          setErrorMsg("Incorrect username or security answer.")
-          setIsLoading(false)
-          return
-        }
-
-        const hashedAnswer = await hashText(cleanAnswer.toLowerCase())
-
-        if (user.security_question !== forgotSecurityQuestion || user.security_answer_hash !== hashedAnswer) {
-          setForgotFailed(true)
-          setFailedUsername(cleanUsername)
-          setErrorMsg("Incorrect security answer.")
-          setIsLoading(false)
-          return
-        }
-
-        // Answer is correct! Reset password
-        const { error: updateErr } = await supabase
-          .from("users")
-          .update({ password_hash: hashedPassword })
-          .eq("id", user.id)
-
-        if (updateErr) throw updateErr
-
-        setSuccessMsg("Password reset successfully! You can now login.")
-        setTimeout(() => {
-          setActiveTab("login")
-          setPassword("") // clear password so they have to type it again
-        }, 1500)
       } else {
         // LOGIN FLOW
         const { data: user, error: loginErr } = await supabase
@@ -319,6 +355,7 @@ ${uname}`
                     type="button"
                     onClick={() => {
                       setActiveTab("forgot")
+                      setForgotStep(1)
                       setErrorMsg("")
                       setLoginFailed(false)
                     }}
@@ -383,9 +420,7 @@ ${uname}`
             </div>
           )}
 
-          {(activeTab === "login" || activeTab === "forgot" || (activeTab === "register" && registerStep === 1)) && (
-            <>
-
+          {(activeTab === "login" || (activeTab === "register" && registerStep === 1) || (activeTab === "forgot" && forgotStep === 1)) && (
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
               Username
@@ -407,7 +442,9 @@ ${uname}`
               />
             </div>
           </div>
+          )}
 
+          {(activeTab === "login" || (activeTab === "register" && registerStep === 1) || (activeTab === "forgot" && forgotStep === 2)) && (
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
               {activeTab === "forgot" ? "New Password" : "Password"}
@@ -417,8 +454,8 @@ ${uname}`
               <Input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={activeTab === "forgot" ? newPassword : password}
+                onChange={(e) => activeTab === "forgot" ? setNewPassword(e.target.value) : setPassword(e.target.value)}
                 disabled={isLoading}
                 required
                 className="pl-9.5 pr-10 py-5.5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
@@ -432,11 +469,30 @@ ${uname}`
               </button>
             </div>
           </div>
-          </>
+          )}
+
+          {activeTab === "forgot" && forgotStep === 2 && (
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  className="pl-9.5 pr-10 py-5.5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                />
+              </div>
+            </div>
           )}
 
           {/* Security Question section — forgot password */}
-          {activeTab === "forgot" && (
+          {activeTab === "forgot" && forgotStep === 1 && (
             <div className="space-y-3 pt-1">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
@@ -567,9 +623,16 @@ ${uname}`
                   variant="outline"
                   disabled={isLoading}
                   onClick={() => {
-                    setActiveTab("login")
-                    setForgotFailed(false)
-                    setErrorMsg("")
+                    if (forgotStep === 2) {
+                      setForgotStep(1)
+                      setNewPassword("")
+                      setConfirmPassword("")
+                      setErrorMsg("")
+                    } else {
+                      setActiveTab("login")
+                      setForgotFailed(false)
+                      setErrorMsg("")
+                    }
                   }}
                   className="py-6 rounded-xl border-slate-200 text-slate-600 font-extrabold text-xs tracking-wider uppercase flex-1"
                 >
@@ -585,7 +648,7 @@ ${uname}`
                   <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    {activeTab === "login" ? "Sign In" : activeTab === "forgot" ? "Reset Password" : "Next"}
+                    {activeTab === "login" ? "Sign In" : activeTab === "forgot" ? (forgotStep === 1 ? "Verify Answer" : "Reset Password") : "Next"}
                     <ArrowRight className="h-4 w-4 stroke-[2.5]" />
                   </>
                 )}
