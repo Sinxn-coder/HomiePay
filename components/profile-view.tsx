@@ -206,7 +206,7 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none" />
         
         {/* Initials Avatar */}
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shadow-md border-4 border-white dark:border-slate-800 shrink-0 scale-105">
+        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800 shrink-0 scale-105">
           {getInitials(userSession.full_name)}
         </div>
 
