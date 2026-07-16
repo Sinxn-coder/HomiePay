@@ -199,28 +199,28 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
   return (
     <div className="w-[95vw] max-w-3xl relative left-1/2 -translate-x-1/2 sm:w-full sm:left-auto sm:translate-x-0 mx-auto space-y-6 pb-24 md:pb-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
       
-      {/* Centered Box Profile Header Card */}
-      <div className="relative rounded-[32px] p-8 md:p-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden flex flex-col items-center justify-center gap-5">
+      {/* Premium Gradient Header Card */}
+      <div className="relative rounded-3xl p-5 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-100 dark:shadow-none overflow-hidden flex flex-row items-center gap-5 sm:gap-6">
         
         {/* Glow effect */}
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none" />
         
         {/* Initials Avatar */}
-        <div className="w-24 h-24 rounded-full bg-[#00c897] dark:bg-emerald-500 flex items-center justify-center text-white text-3xl font-black shadow-[0_0_0_6px_rgba(255,255,255,1)] dark:shadow-[0_0_0_6px_rgba(15,23,42,1)] shrink-0 z-10">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shadow-md border-4 border-white dark:border-slate-800 shrink-0 scale-105">
           {getInitials(userSession.full_name)}
         </div>
 
         {/* Profile Meta details */}
-        <div className="text-center space-y-2 mt-2 z-10">
-          <div className="flex items-center justify-center gap-3">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{userSession.full_name}</h2>
-            <div className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide flex items-center gap-1">
-              <ShieldCheck className="h-3 w-3" />
+        <div className="text-left flex flex-col justify-center flex-1 space-y-1">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-none">{userSession.full_name}</h2>
+          <p className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-bold tracking-wide">@{userSession.username}</p>
+          
+          <div className="pt-1.5">
+            <div className="inline-flex px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-[9px] sm:text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide items-center gap-1.5 w-fit">
+              <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               Verified Cloud
             </div>
           </div>
-          <p className="text-sm text-[#00c897] dark:text-emerald-400 font-bold tracking-wide">@{userSession.username}</p>
         </div>
       </div>
 
