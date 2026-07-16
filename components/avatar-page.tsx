@@ -58,7 +58,7 @@ export function AvatarPage({ currentAvatar, onClose, onSave }: AvatarPageProps) 
           Choose a unique animated avatar for your profile
         </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 w-full">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 sm:gap-6 w-full max-w-xl mx-auto">
           {AVATAR_OPTIONS.map((avatarUrl, index) => {
             const isSelected = selectedAvatar === avatarUrl
             
@@ -66,7 +66,7 @@ export function AvatarPage({ currentAvatar, onClose, onSave }: AvatarPageProps) 
               <button
                 key={index}
                 onClick={() => setSelectedAvatar(avatarUrl)}
-                className={`relative group rounded-3xl overflow-hidden aspect-square border-4 transition-all duration-300 ${
+                className={`relative group rounded-3xl overflow-hidden aspect-square border-4 transition-all duration-300 p-2 sm:p-3 ${
                   isSelected 
                     ? "border-emerald-500 shadow-xl shadow-emerald-500/20 scale-105" 
                     : "border-transparent hover:border-slate-200 dark:hover:border-slate-700 bg-white dark:bg-slate-800 shadow-sm"
@@ -75,8 +75,8 @@ export function AvatarPage({ currentAvatar, onClose, onSave }: AvatarPageProps) 
                 <img 
                   src={avatarUrl} 
                   alt={`Avatar Option ${index + 1}`} 
-                  className={`w-full h-full object-contain transition-transform duration-300 ${isSelected ? "" : "group-hover:scale-110"} ${
-                    avatarUrl.includes('female2.gif') ? '-translate-y-2 sm:-translate-y-4 scale-[1.25]' : ''
+                  className={`w-full h-full object-contain transition-transform duration-300 ${isSelected ? "scale-95" : "scale-90 group-hover:scale-100"} ${
+                    avatarUrl.includes('female2.gif') ? '-translate-y-2 scale-100 group-hover:scale-110' : ''
                   }`}
                 />
                 
