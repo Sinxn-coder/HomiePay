@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { User, Calendar, Hash, ShieldCheck, Check, LogOut, Loader2, Sparkles, Coins, Users, LifeBuoy, Bell } from "lucide-react"
+import { User, Calendar, Hash, ShieldCheck, Check, LogOut, Loader2, Sparkles, Coins, Users, LifeBuoy, Bell, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { supabase } from "@/lib/supabase"
+import { SecurityPage } from "@/components/security-page"
 
 interface ProfileViewProps {
   userSession: { id: string; username: string; full_name: string }
@@ -27,6 +28,7 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
   const [supportSubject, setSupportSubject] = useState("")
   const [supportMessage, setSupportMessage] = useState("")
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false)
+  const [showSecurityPage, setShowSecurityPage] = useState(false)
 
   const [pushEnabled, setPushEnabled] = useState(false)
   const [isTogglingPush, setIsTogglingPush] = useState(false)
@@ -187,6 +189,12 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
       setIsSubmittingTicket(false)
     }
   }
+
+  if (showSecurityPage) {
+    return <SecurityPage userSession={userSession} onBack={() => setShowSecurityPage(false)} />
+  }
+
+  if (!mounted) return null
 
   return (
     <div className="w-[95vw] max-w-3xl relative left-1/2 -translate-x-1/2 sm:w-full sm:left-auto sm:translate-x-0 mx-auto space-y-6 pb-24 md:pb-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -361,6 +369,16 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-indigo-500"></div>
               </label>
             </div>
+
+            <Button
+              onClick={() => setShowSecurityPage(true)}
+              variant="outline"
+              className="w-full py-5 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            >
+              <Lock className="h-3.5 w-3.5" />
+              Change Password & Security
+            </Button>
+
             <Button
               onClick={handleLogout}
               variant="outline"
