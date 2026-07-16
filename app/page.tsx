@@ -127,22 +127,22 @@ export default function Home() {
 
   if (systemSettings?.maintenance_mode) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
         <div className="relative w-64 h-64 mb-8">
-          <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <img src="/maintenance.png" alt="Maintenance Mode" className="w-full h-full object-contain relative z-10 drop-shadow-2xl" />
+          <div className="absolute inset-0 bg-emerald-100 rounded-full blur-3xl animate-pulse"></div>
+          <img src="/maintenance.png" alt="Maintenance Mode" className="w-full h-full object-contain relative z-10 drop-shadow-sm" />
         </div>
-        <h1 className="text-4xl font-black text-white tracking-tight mb-4 flex items-center gap-3">
-          <Settings2 className="h-8 w-8 text-emerald-500 animate-spin-slow" />
+        <h1 className="text-4xl font-black text-emerald-900 tracking-tight mb-4 flex items-center justify-center gap-3 w-full">
+          <Settings2 className="h-8 w-8 text-emerald-600 animate-spin-slow" />
           System Maintenance
         </h1>
-        <p className="text-slate-400 max-w-md mx-auto text-lg leading-relaxed">
+        <p className="text-emerald-700 max-w-md mx-auto text-lg leading-relaxed">
           HomiePay is currently undergoing scheduled upgrades to improve your experience. We'll be right back!
         </p>
         <div className="mt-8 flex gap-2 justify-center">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"></div>
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce"></div>
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
         </div>
       </div>
     )
