@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import { Shield, Wallet, Lock, User, LogOut, Users, UsersRound, ReceiptText, LayoutDashboard, Settings, MoreVertical, Edit, KeyRound, Ban, CheckCircle2, Trash2, Eye, Flag, AlertTriangle, LifeBuoy, Check, Megaphone, Server, Send } from "lucide-react"
+import { Shield, Wallet, Lock, User, LogOut, Users, UsersRound, ReceiptText, LayoutDashboard, Settings, MoreVertical, Edit, KeyRound, Ban, CheckCircle2, Trash2, Eye, Flag, AlertTriangle, LifeBuoy, Check, Megaphone, Server, Send, Plus } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,13 +28,14 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("")
   const [loginMessage, setLoginMessage] = useState("")
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "groups" | "bills" | "support" | "settings">("dashboard")
+  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "groups" | "bills" | "support" | "audit" | "settings">("dashboard")
   
   const [stats, setStats] = useState({ users: 0, groups: 0, bills: 0 })
   const [usersList, setUsersList] = useState<any[]>([])
   const [groupsList, setGroupsList] = useState<any[]>([])
   const [billsList, setBillsList] = useState<any[]>([])
   const [supportTicketsList, setSupportTicketsList] = useState<any[]>([])
+  const [auditLogsList, setAuditLogsList] = useState<any[]>([])
   const [totalMoneyTracked, setTotalMoneyTracked] = useState(0)
 
   // Settings State
@@ -75,14 +76,15 @@ export default function AdminPage() {
 
   const fetchDashboardData = async () => {
     try {
-      const [usersRes, groupsRes, billsRes, groupsDataRes, billsDataRes, supportRes, settingsRes] = await Promise.all([
+      const [usersRes, groupsRes, billsRes, groupsDataRes, billsDataRes, supportRes, settingsRes, auditLogsRes] = await Promise.all([
         supabase.from("users").select("id, username, full_name, created_at, is_banned", { count: 'exact' }),
         supabase.from("groups").select("id", { count: 'exact', head: true }),
         supabase.from("bills").select("id", { count: 'exact', head: true }),
         supabase.from("groups").select("*, users(username)"),
         supabase.from("bills").select("*, users(username), groups(name)"),
         supabase.from("support_tickets").select("*, users(username)"),
-        supabase.from("system_settings").select("*").eq("id", 1).maybeSingle()
+        supabase.from("system_settings").select("*").eq("id", 1).maybeSingle(),
+        supabase.from("audit_logs").select("*, users(username, full_name)").order("created_at", { ascending: false }).limit(200)
       ])
 
       setStats({
@@ -115,6 +117,10 @@ export default function AdminPage() {
           maintenance_mode: settingsRes.data.maintenance_mode || false,
           announcement_message: settingsRes.data.announcement_message || ""
         })
+      }
+
+      if (auditLogsRes && !auditLogsRes.error && auditLogsRes.data) {
+        setAuditLogsList(auditLogsRes.data)
       }
     } catch (err) {
       console.error("Error fetching admin data:", err)
@@ -477,6 +483,14 @@ export default function AdminPage() {
             <LifeBuoy className={`h-5 w-5 shrink-0 transition-colors ${activeTab === "support" ? "text-emerald-500" : "group-hover/nav:text-white"}`} />
             <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Support & Feedback</span>
           </button>
+          
+          <button
+                  onClick={() => setActiveTab("audit")}
+                  className={`relative flex items-center px-5 py-3 mx-2 rounded-xl transition-all duration-200 cursor-pointer overflow-hidden group/nav ${activeTab === "audit" ? "bg-emerald-600/10 text-emerald-500" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+                >
+                  <Flag className={`h-5 w-5 shrink-0 transition-colors ${activeTab === "audit" ? "text-emerald-500" : "group-hover/nav:text-white"}`} />
+                  <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Audit Logs</span>
+                </button>
           
           <button 
             onClick={() => setActiveTab("settings")}
@@ -860,6 +874,83 @@ export default function AdminPage() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "audit" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <Flag className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+                    Audit Logs
+                  </h2>
+                  <p className="text-sm text-slate-500 font-medium">Real-time system activity tracking</p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden w-full max-w-full">
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-sm text-left border-collapse">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase border-b border-slate-100 dark:border-slate-800">
+                      <tr>
+                        <th className="px-6 py-4 font-semibold w-1/4">User</th>
+                        <th className="px-6 py-4 font-semibold w-1/2">Action</th>
+                        <th className="px-6 py-4 font-semibold w-1/4 text-right">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {auditLogsList.map((log) => {
+                        let actionText = ""
+                        let actionIcon = <LayoutDashboard className="h-4 w-4 text-slate-400" />
+                        
+                        const targetName = log.record_details?.name || log.record_details?.subject || log.record_details?.username || "an item"
+                        
+                        if (log.action_type === "INSERT") {
+                          actionText = `Created ${targetName} in ${log.table_name}`
+                          actionIcon = <Plus className="h-4 w-4 text-emerald-500" />
+                        } else if (log.action_type === "UPDATE") {
+                          actionText = `Updated ${targetName} in ${log.table_name}`
+                          actionIcon = <Edit className="h-4 w-4 text-amber-500" />
+                        } else if (log.action_type === "DELETE") {
+                          actionText = `Deleted ${targetName} from ${log.table_name}`
+                          actionIcon = <Trash2 className="h-4 w-4 text-rose-500" />
+                        }
+
+                        return (
+                          <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td className="px-6 py-4">
+                              {log.users ? (
+                                <span className="font-bold text-slate-900 dark:text-white">@{log.users.username}</span>
+                              ) : (
+                                <span className="font-semibold text-slate-400 italic">System / Unknown</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                {actionIcon}
+                                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                  {actionText}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right text-slate-500 text-xs font-semibold">
+                              {new Date(log.created_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                      {auditLogsList.length === 0 && (
+                        <tr>
+                          <td colSpan={3} className="px-6 py-12 text-center text-slate-500">
+                            No audit logs found. Make sure you have run the SQL script in Supabase!
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
