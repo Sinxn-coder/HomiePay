@@ -169,3 +169,53 @@ self.addEventListener('fetch', (event) => {
     })()
   );
 });
+
+// ─── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  try {
+    const data = event.data.json();
+    const title = data.title || 'HomiePay Update';
+    const options = {
+      body: data.body || 'You have a new notification.',
+      icon: data.icon || '/icon-512x512.png',
+      badge: data.badge || '/icon-512x512.png',
+      data: data.url || '/', // URL to open on click
+      vibrate: [100, 50, 100],
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+  } catch (err) {
+    console.error('[SW] Error parsing push data:', err);
+    // Fallback if not JSON
+    event.waitUntil(
+      self.registration.showNotification('HomiePay Update', {
+        body: event.data.text(),
+        icon: '/icon-512x512.png',
+      })
+    );
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const urlToOpen = event.notification.data || '/';
+  
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Check if there is already a window/tab open with the target URL
+      for (let i = 0; i < windowClients.length; i++) {
+        const client = windowClients[i];
+        // If so, just focus it
+        if (client.url.includes(urlToOpen) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // If not, open a new window
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import { Shield, Wallet, Lock, User, LogOut, Users, UsersRound, ReceiptText, LayoutDashboard, Settings, MoreVertical, Edit, KeyRound, Ban, CheckCircle2, Trash2, Eye, Flag, AlertTriangle, LifeBuoy, Check } from "lucide-react"
+import { Shield, Wallet, Lock, User, LogOut, Users, UsersRound, ReceiptText, LayoutDashboard, Settings, MoreVertical, Edit, KeyRound, Ban, CheckCircle2, Trash2, Eye, Flag, AlertTriangle, LifeBuoy, Check, Megaphone, Server, Send } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,7 +28,7 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("")
   const [loginMessage, setLoginMessage] = useState("")
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "groups" | "bills" | "support">("dashboard")
+  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "groups" | "bills" | "support" | "settings">("dashboard")
   
   const [stats, setStats] = useState({ users: 0, groups: 0, bills: 0 })
   const [usersList, setUsersList] = useState<any[]>([])
@@ -36,6 +36,12 @@ export default function AdminPage() {
   const [billsList, setBillsList] = useState<any[]>([])
   const [supportTicketsList, setSupportTicketsList] = useState<any[]>([])
   const [totalMoneyTracked, setTotalMoneyTracked] = useState(0)
+
+  // Settings State
+  const [systemSettings, setSystemSettings] = useState({ maintenance_mode: false, announcement_message: "" })
+  const [pushTitle, setPushTitle] = useState("")
+  const [pushBody, setPushBody] = useState("")
+  const [pushTarget, setPushTarget] = useState("all")
 
   // User Actions State
   const [selectedUser, setSelectedUser] = useState<any>(null)
@@ -67,13 +73,14 @@ export default function AdminPage() {
 
   const fetchDashboardData = async () => {
     try {
-      const [usersRes, groupsRes, billsRes, groupsDataRes, billsDataRes, supportRes] = await Promise.all([
+      const [usersRes, groupsRes, billsRes, groupsDataRes, billsDataRes, supportRes, settingsRes] = await Promise.all([
         supabase.from("users").select("id, username, full_name, created_at, is_banned", { count: 'exact' }),
         supabase.from("groups").select("id", { count: 'exact', head: true }),
         supabase.from("bills").select("id", { count: 'exact', head: true }),
         supabase.from("groups").select("*, users(username)"),
         supabase.from("bills").select("*, users(username), groups(name)"),
-        supabase.from("support_tickets").select("*, users(username)")
+        supabase.from("support_tickets").select("*, users(username)"),
+        supabase.from("system_settings").select("*").eq("id", 1).maybeSingle()
       ])
 
       setStats({
@@ -99,6 +106,13 @@ export default function AdminPage() {
 
       if (supportRes.data) {
         setSupportTicketsList(supportRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+      }
+
+      if (settingsRes.data) {
+        setSystemSettings({
+          maintenance_mode: settingsRes.data.maintenance_mode || false,
+          announcement_message: settingsRes.data.announcement_message || ""
+        })
       }
     } catch (err) {
       console.error("Error fetching admin data:", err)
@@ -258,6 +272,37 @@ export default function AdminPage() {
       await fetchDashboardData()
     } catch (err) {
       console.error("Error closing ticket:", err)
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    try {
+      const { error } = await supabase.from('system_settings').upsert({ 
+        id: 1, 
+        maintenance_mode: systemSettings.maintenance_mode,
+        announcement_message: systemSettings.announcement_message || null
+      })
+      if (error) throw error
+      alert("System settings saved successfully!")
+    } catch (err) {
+      console.error("Error saving settings:", err)
+      alert("Failed to save settings.")
+    }
+  }
+
+  const handleSendPush = async () => {
+    if (!pushTitle || !pushBody) return
+    try {
+      const { data, error } = await supabase.functions.invoke('send-push', {
+        body: { title: pushTitle, body: pushBody, userId: pushTarget }
+      })
+      if (error) throw error
+      alert(`Push notification sent successfully to ${data.count || 0} devices!`)
+      setPushTitle("")
+      setPushBody("")
+    } catch (err) {
+      console.error("Error sending push:", err)
+      alert("Failed to send push notification.")
     }
   }
 
@@ -429,6 +474,17 @@ export default function AdminPage() {
             )}
             <LifeBuoy className={`h-5 w-5 shrink-0 transition-colors ${activeTab === "support" ? "text-emerald-500" : "group-hover/nav:text-white"}`} />
             <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Support & Feedback</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab("settings")}
+            className={`relative flex items-center px-5 py-3 mx-2 rounded-xl transition-all duration-200 cursor-pointer overflow-hidden group/nav ${activeTab === "settings" ? "bg-emerald-600/10 text-emerald-500" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+          >
+            {activeTab === "settings" && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-emerald-500 rounded-r-full" />
+            )}
+            <Settings className={`h-5 w-5 shrink-0 transition-colors ${activeTab === "settings" ? "text-emerald-500" : "group-hover/nav:text-white"}`} />
+            <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">System Settings</span>
           </button>
         </nav>
 
@@ -802,6 +858,100 @@ export default function AdminPage() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "settings" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              
+              {/* Core System Settings */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden p-6">
+                <h3 className="text-lg font-bold flex items-center gap-2 mb-6">
+                  <Server className="h-5 w-5 text-indigo-500" />
+                  Core System Configuration
+                </h3>
+                
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div>
+                      <h4 className="font-bold text-slate-900 dark:text-white">Maintenance Mode</h4>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Lock the main app and show a "We'll be right back" screen.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={systemSettings.maintenance_mode}
+                        onChange={(e) => setSystemSettings({ ...systemSettings, maintenance_mode: e.target.checked })}
+                      />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-rose-500"></div>
+                    </label>
+                  </div>
+
+                  <div className="space-y-2 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <h4 className="font-bold text-slate-900 dark:text-white">Global Announcement Banner</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Display a sticky banner at the top of the app for all users.</p>
+                    <Input
+                      placeholder="e.g. New feature dropping tomorrow!"
+                      value={systemSettings.announcement_message}
+                      onChange={(e) => setSystemSettings({ ...systemSettings, announcement_message: e.target.value })}
+                      className="w-full bg-white dark:bg-slate-950"
+                    />
+                  </div>
+
+                  <Button onClick={handleSaveSettings} className="bg-indigo-600 hover:bg-indigo-700 text-white w-full py-6">
+                    Save System Settings
+                  </Button>
+                </div>
+              </div>
+
+              {/* Push Notifications Transmitter */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden p-6">
+                <h3 className="text-lg font-bold flex items-center gap-2 mb-6">
+                  <Megaphone className="h-5 w-5 text-emerald-500" />
+                  Push Notifications Transmitter
+                </h3>
+                
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Target Audience</label>
+                    <select 
+                      value={pushTarget}
+                      onChange={(e) => setPushTarget(e.target.value)}
+                      className="w-full h-10 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm"
+                    >
+                      <option value="all">All Users</option>
+                      {usersList.map(u => (
+                        <option key={u.id} value={u.id}>@{u.username} ({u.full_name})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Notification Title</label>
+                    <Input
+                      placeholder="e.g. Version 6.0 is Live!"
+                      value={pushTitle}
+                      onChange={(e) => setPushTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Notification Body</label>
+                    <Input
+                      placeholder="e.g. Check out the new groups feature!"
+                      value={pushBody}
+                      onChange={(e) => setPushBody(e.target.value)}
+                    />
+                  </div>
+                  
+                  <Button 
+                    onClick={handleSendPush} 
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white mt-4 flex items-center gap-2"
+                  >
+                    <Send className="h-4 w-4" />
+                    Transmit Push Notification
+                  </Button>
+                </div>
               </div>
             </div>
           )}

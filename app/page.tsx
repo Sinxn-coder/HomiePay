@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
-import { Wallet, ArrowRight, Sparkles, DollarSign, Send, Landmark, Coins, LogOut } from "lucide-react"
+import { Wallet, ArrowRight, Sparkles, DollarSign, Send, Landmark, Coins, LogOut, Megaphone, Lock, Settings2 } from "lucide-react"
 import { LoginPage } from "@/components/login-page"
 import { SecurityQuestionModal } from "@/components/security-question-modal"
 import { supabase } from "@/lib/supabase"
@@ -19,6 +19,66 @@ export default function Home() {
   const [userSession, setUserSession] = useState<{ id: string; username: string; full_name: string } | null>(null)
   const [animationDone, setAnimationDone] = useState(false)
   const [needsSecurityQuestion, setNeedsSecurityQuestion] = useState(false)
+  const [systemSettings, setSystemSettings] = useState<{ maintenance_mode: boolean, announcement_message: string | null } | null>(null)
+
+  // Fetch System Settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data, error } = await supabase.from('system_settings').select('*').eq('id', 1).maybeSingle()
+        if (!error && data) {
+          setSystemSettings(data)
+        }
+      } catch (e) {
+        console.error("Failed to fetch system settings", e)
+      }
+    }
+    fetchSettings()
+  }, [])
+
+  // Push Notifications Setup
+  const registerPushNotifications = async (userId: string) => {
+    try {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+
+      const registration = await navigator.serviceWorker.ready;
+      
+      // VAPID Public Key generated for the app
+      const vapidPublicKey = 'BA8b7deu7x4Y8zadSwR1HXtLWzhHrvI7WKB2jCEM5l8BGrUIxkQSgHlSxgz0y_VG-1SelmJunP7LWJTN_34gg6Q';
+      const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedVapidKey
+      });
+
+      const subData = JSON.parse(JSON.stringify(subscription));
+
+      await supabase.from('push_subscriptions').upsert({
+        user_id: userId,
+        endpoint: subData.endpoint,
+        p256dh: subData.keys.p256dh,
+        auth: subData.keys.auth
+      }, { onConflict: 'user_id,endpoint' });
+      
+    } catch (e) {
+      console.error("Push registration failed", e);
+    }
+  }
+
+  // Utility to convert Base64 URL safe to Uint8Array for VAPID
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
 
   // Check if a logged-in user needs to set a security question
   const checkSecurityQuestion = async (userId: string) => {
@@ -46,6 +106,7 @@ export default function Home() {
         setUserSession(session)
         setIsStarted(true) // Automatically bypass landing page if logged in!
         checkSecurityQuestion(session.id)
+        registerPushNotifications(session.id)
       } catch (e) {
         localStorage.removeItem("homiepay-user-session")
       }
@@ -64,6 +125,29 @@ export default function Home() {
     setUserSession(null)
   }
 
+  if (systemSettings?.maintenance_mode) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
+        <div className="relative w-64 h-64 mb-8">
+          <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <img src="/maintenance.png" alt="Maintenance Mode" className="w-full h-full object-contain relative z-10 drop-shadow-2xl" />
+        </div>
+        <h1 className="text-4xl font-black text-white tracking-tight mb-4 flex items-center gap-3">
+          <Settings2 className="h-8 w-8 text-emerald-500 animate-spin-slow" />
+          System Maintenance
+        </h1>
+        <p className="text-slate-400 max-w-md mx-auto text-lg leading-relaxed">
+          HomiePay is currently undergoing scheduled upgrades to improve your experience. We'll be right back!
+        </p>
+        <div className="mt-8 flex gap-2 justify-center">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"></div>
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+        </div>
+      </div>
+    )
+  }
+
   if (isStarted) {
     return (
       <div 
@@ -72,6 +156,13 @@ export default function Home() {
         }`}
         onAnimationEnd={() => setAnimationDone(true)}
       >
+        {/* Global Announcement Banner */}
+        {systemSettings?.announcement_message && (
+          <div className="w-full bg-indigo-600 text-white px-4 py-2.5 text-center text-sm font-semibold flex items-center justify-center gap-2 shadow-md z-50 animate-in slide-in-from-top-2">
+            <Megaphone className="h-4 w-4 shrink-0" />
+            <span className="truncate">{systemSettings.announcement_message}</span>
+          </div>
+        )}
 
         {/* Dynamic Main Workspace Container */}
         <div className="flex-1 max-w-5xl w-full mx-auto p-4 md:py-8 flex flex-col justify-center">
@@ -80,6 +171,7 @@ export default function Home() {
               setUserSession(session);
               localStorage.setItem("homiepay-user-session", JSON.stringify(session));
               checkSecurityQuestion(session.id);
+              registerPushNotifications(session.id);
             }} />
           ) : (
             <ExpenseSplitter 
