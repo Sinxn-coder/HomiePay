@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { ArrowLeft, ShieldCheck, Lock, CheckCircle, AlertCircle, Eye, EyeOff, Key, Save, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,7 +14,10 @@ interface SecurityPageProps {
 }
 
 export function SecurityPage({ userSession, onBack }: SecurityPageProps) {
+  const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState<"password" | "question">("password")
+  
+  useEffect(() => setMounted(true), [])
   
   // Password State
   const [currentPassword, setCurrentPassword] = useState("")
@@ -149,8 +153,10 @@ export function SecurityPage({ userSession, onBack }: SecurityPageProps) {
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950 flex flex-col overflow-y-auto animate-in slide-in-from-right duration-300">
+  if (!mounted) return null
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-950 flex flex-col overflow-y-auto animate-in slide-in-from-right duration-300">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-4 flex items-center justify-between shadow-sm">
         <Button 
@@ -367,6 +373,7 @@ export function SecurityPage({ userSession, onBack }: SecurityPageProps) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
