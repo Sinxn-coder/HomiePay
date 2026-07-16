@@ -130,7 +130,7 @@ export default function Home() {
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
         <div className="relative w-64 h-64 mb-8">
           <div className="absolute inset-0 bg-emerald-100 rounded-full blur-3xl animate-pulse"></div>
-          <img src="/maintenance.png" alt="Maintenance Mode" className="w-full h-full object-contain relative z-10 drop-shadow-sm" />
+          <img src="/maintenance.webp" alt="Maintenance Mode" className="w-full h-full object-contain relative z-10 drop-shadow-sm" />
         </div>
         <h1 className="text-4xl font-black text-emerald-900 tracking-tight mb-4 flex items-center justify-center gap-3 w-full">
           <Settings2 className="h-8 w-8 text-emerald-600 animate-spin-slow" />
