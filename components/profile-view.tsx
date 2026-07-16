@@ -11,8 +11,8 @@ import { SecurityPage } from "@/components/security-page"
 import { AvatarPage } from "@/components/avatar-page"
 
 interface ProfileViewProps {
-  userSession: { id: string; username: string; full_name: string }
-  onProfileUpdate: (session: { id: string; username: string; full_name: string }) => void
+  userSession: { id: string; username: string; full_name: string; avatar_url?: string | null }
+  onProfileUpdate: (session: { id: string; username: string; full_name: string; avatar_url?: string | null }) => void
   totalGroups: number
   totalBills: number
 }
@@ -38,9 +38,8 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
 
   useEffect(() => {
     setMounted(true)
-    const savedAvatar = localStorage.getItem("homiepay-avatar")
-    if (savedAvatar) {
-      setAvatarUrl(savedAvatar)
+    if (userSession.avatar_url) {
+      setAvatarUrl(userSession.avatar_url)
     }
     const checkPush = async () => {
       if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -206,10 +205,13 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
       <AvatarPage 
         currentAvatar={avatarUrl}
         onClose={() => setShowAvatarPage(false)}
-        onSave={(url) => {
+        onSave={async (url) => {
           setAvatarUrl(url)
-          localStorage.setItem("homiepay-avatar", url)
           setShowAvatarPage(false)
+          // Save to database
+          await supabase.from("users").update({ avatar_url: url }).eq("id", userSession.id)
+          // Update global session
+          onProfileUpdate({ ...userSession, avatar_url: url })
         }}
       />
     )

@@ -58,7 +58,7 @@ function MaintenanceScreen() {
 export default function Home() {
   const [isStarted, setIsStarted] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
-  const [userSession, setUserSession] = useState<{ id: string; username: string; full_name: string } | null>(null)
+  const [userSession, setUserSession] = useState<{ id: string; username: string; full_name: string; avatar_url?: string | null } | null>(null)
   const [animationDone, setAnimationDone] = useState(false)
   const [needsSecurityQuestion, setNeedsSecurityQuestion] = useState(false)
   const [systemSettings, setSystemSettings] = useState<{ maintenance_mode: boolean, announcement_message: string | null } | null>(null)

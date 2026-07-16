@@ -25,6 +25,7 @@ import { PremiumModal } from "@/components/premium-modal"
 import type { Group, Person, SavedBill } from "@/lib/types"
 import { calculateGroupBalances, calculateSplits, calculateOwes } from "@/lib/finance-engine"
 import { toast } from "sonner"
+import { useStore } from "@/store/useStore"
 
 interface GroupsViewProps {
   groups: Group[]
@@ -80,6 +81,8 @@ export function GroupsView({
   const [editingMemberName, setEditingMemberName] = useState("")
   const [activeDetailGroupId, setActiveDetailGroupId] = useState<string | null>(null)
   const [groupDetailTab, setGroupDetailTab] = useState<"members" | "bills" | "new-bill" | "balances">("members")
+  
+  const userProfiles = useStore((state) => state.userProfiles)
 
   // Settlement modal state
   const [settleModalOpen, setSettleModalOpen] = useState(false)
@@ -637,9 +640,21 @@ export function GroupsView({
                       ) : (
                         <>
                           <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-[10px] font-black shrink-0">
-                              {member.name.charAt(0).toUpperCase()}
-                            </div>
+                            {member.userId && userProfiles[member.userId]?.avatar_url ? (
+                              <div className="w-7 h-7 shrink-0 relative flex items-center justify-center">
+                                <img 
+                                  src={userProfiles[member.userId].avatar_url!} 
+                                  alt={member.name} 
+                                  className={`w-full h-full object-contain drop-shadow-md scale-[1.25] ${
+                                    userProfiles[member.userId].avatar_url!.includes('female2.gif') ? '-translate-y-0.5 sm:-translate-y-1' : ''
+                                  }`} 
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-[10px] font-black shrink-0">
+                                {member.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
                             <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{member.name}</span>
                           </div>
                           {(!member.userId || canRemoveMember(activeGroup, member)) && (

@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase"
 import { SECURITY_QUESTIONS } from "@/components/security-question-modal"
 
 interface LoginPageProps {
-  onSuccess: (session: { id: string; username: string; full_name: string }) => void
+  onSuccess: (session: { id: string; username: string; full_name: string; avatar_url?: string | null }) => void
 }
 
 export function LoginPage({ onSuccess }: LoginPageProps) {
@@ -149,7 +149,7 @@ ${uname}`
             security_question: securityQuestion,
             security_answer_hash: hashedAnswer,
           })
-          .select("id, username, full_name")
+          .select("id, username, full_name, avatar_url")
           .single()
 
         if (registerErr) throw registerErr
@@ -244,7 +244,7 @@ ${uname}`
         // LOGIN FLOW
         const { data: user, error: loginErr } = await supabase
           .from("users")
-          .select("id, username, password_hash, full_name, is_banned")
+          .select("id, username, password_hash, full_name, is_banned, avatar_url")
           .eq("username", cleanUsername)
           .maybeSingle()
 
@@ -270,6 +270,7 @@ ${uname}`
             id: user.id,
             username: user.username,
             full_name: user.full_name,
+            avatar_url: user.avatar_url
           })
         }, 800)
       }

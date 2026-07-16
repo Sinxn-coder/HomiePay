@@ -5,14 +5,37 @@ import { createSavedBillsSlice, SavedBillsSlice } from './createSavedBillsSlice'
 import { supabase } from '../lib/supabase'
 
 export type StoreState = ActiveBillSlice & GroupsSlice & SavedBillsSlice & {
-  userSession: { id: string; username: string; full_name: string } | null
-  setUserSession: (session: { id: string; username: string; full_name: string } | null) => void
+  userSession: { id: string; username: string; full_name: string; avatar_url?: string | null } | null
+  setUserSession: (session: { id: string; username: string; full_name: string; avatar_url?: string | null } | null) => void
+  userProfiles: Record<string, { full_name: string; avatar_url: string | null }>
+  fetchUserProfiles: (userIds: string[]) => Promise<void>
   syncPendingData: () => Promise<void>
   fetchRemoteData: () => Promise<void>
 }
 
 export const useStore = create<StoreState>()((set, get, api) => ({
   userSession: null,
+  userProfiles: {},
+
+  fetchUserProfiles: async (userIds: string[]) => {
+    if (userIds.length === 0) return
+    const currentProfiles = get().userProfiles
+    const missingIds = userIds.filter(id => !currentProfiles[id])
+    if (missingIds.length === 0) return
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, full_name, avatar_url')
+      .in('id', missingIds)
+
+    if (!error && data) {
+      const newProfiles = { ...currentProfiles }
+      data.forEach((user: any) => {
+        newProfiles[user.id] = { full_name: user.full_name, avatar_url: user.avatar_url }
+      })
+      set({ userProfiles: newProfiles })
+    }
+  },
 
   setUserSession: (session) => {
     set({ userSession: session })
@@ -134,6 +157,17 @@ export const useStore = create<StoreState>()((set, get, api) => ({
       localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(mergedGroups))
       get().setGroups(mergedGroups)
 
+      // Fetch user profiles for all members in these groups
+      const allMemberUserIds = new Set<string>()
+      mergedGroups.forEach(g => {
+        g.members.forEach(m => {
+          if (m.userId) allMemberUserIds.add(m.userId)
+        })
+      })
+      if (allMemberUserIds.size > 0) {
+        get().fetchUserProfiles(Array.from(allMemberUserIds))
+      }
+
       // Also clean up joined-group-ids list for any groups now gone
       const cleanedJoinedIds = joinedIds.filter(id => remoteGroupIdSet.has(id))
       if (cleanedJoinedIds.length !== joinedIds.length) {
@@ -141,6 +175,17 @@ export const useStore = create<StoreState>()((set, get, api) => ({
       }
     } else {
       allRelevantGroupIds = groups.map(g => g.id)
+      
+      // Fetch user profiles for local groups too if offline start
+      const allMemberUserIds = new Set<string>()
+      groups.forEach(g => {
+        g.members.forEach(m => {
+          if (m.userId) allMemberUserIds.add(m.userId)
+        })
+      })
+      if (allMemberUserIds.size > 0) {
+        get().fetchUserProfiles(Array.from(allMemberUserIds))
+      }
     }
 
     // Fetch bills for those groups OR bills we created without a group
