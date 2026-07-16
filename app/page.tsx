@@ -13,6 +13,48 @@ const ExpenseSplitter = dynamic(
   { ssr: false }
 )
 
+const MAINTENANCE_MESSAGES = [
+  "HomiePay is currently undergoing scheduled upgrades to improve your experience. We'll be right back!",
+  "We are tuning up the engines to make splitting bills even faster and smoother.",
+  "Hang tight! Our developers are adding some fresh new magic to the app."
+];
+
+function MaintenanceScreen() {
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIndex(prev => (prev + 1) % MAINTENANCE_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
+      <div className="relative w-64 h-64 mb-8">
+        <div className="absolute inset-0 bg-emerald-100 rounded-full blur-3xl animate-pulse"></div>
+        <img src="/maintenance.webp" alt="Maintenance Mode" className="w-full h-full object-contain relative z-10 drop-shadow-sm" />
+      </div>
+      <h1 className="text-4xl font-black text-emerald-900 tracking-tight mb-4 flex items-center justify-center gap-3 w-full">
+        System Maintenance
+      </h1>
+      <div className="h-24 flex items-center justify-center w-full max-w-md mx-auto">
+        <p
+          key={msgIndex}
+          className="text-emerald-700 text-lg leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500"
+        >
+          {MAINTENANCE_MESSAGES[msgIndex]}
+        </p>
+      </div>
+      <div className="mt-8 flex gap-2 justify-center">
+        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce"></div>
+        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [isStarted, setIsStarted] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
@@ -127,23 +169,7 @@ export default function Home() {
 
   if (systemSettings?.maintenance_mode) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
-        <div className="relative w-64 h-64 mb-8">
-          <div className="absolute inset-0 bg-emerald-100 rounded-full blur-3xl animate-pulse"></div>
-          <img src="/maintenance.webp" alt="Maintenance Mode" className="w-full h-full object-contain relative z-10 drop-shadow-sm" />
-        </div>
-        <h1 className="text-4xl font-black text-emerald-900 tracking-tight mb-4 flex items-center justify-center gap-3 w-full">
-          System Maintenance
-        </h1>
-        <p className="text-emerald-700 max-w-md mx-auto text-lg leading-relaxed">
-          HomiePay is currently undergoing scheduled upgrades to improve your experience. We'll be right back!
-        </p>
-        <div className="mt-8 flex gap-2 justify-center">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce"></div>
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
-        </div>
-      </div>
+      <MaintenanceScreen />
     )
   }
 
