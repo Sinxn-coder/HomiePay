@@ -248,7 +248,7 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
           <button 
             type="button"
             onClick={() => setShowAvatarPage(true)}
-            className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1.5 sm:p-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group z-20"
+            className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1.5 sm:p-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group z-20"
           >
             <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 group-hover:text-emerald-500 transition-colors" />
           </button>
