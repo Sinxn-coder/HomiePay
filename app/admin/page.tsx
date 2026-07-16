@@ -873,36 +873,44 @@ export default function AdminPage() {
                 </h3>
                 
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white">Maintenance Mode</h4>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Lock the main app and show a "We'll be right back" screen.</p>
+                  {/* Maintenance Mode Block */}
+                  <div className="flex flex-col gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white">Maintenance Mode</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Lock the main app and show a "We'll be right back" screen.</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer" 
+                          checked={systemSettings.maintenance_mode}
+                          onChange={(e) => setSystemSettings({ ...systemSettings, maintenance_mode: e.target.checked })}
+                        />
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-rose-500"></div>
+                      </label>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        className="sr-only peer" 
-                        checked={systemSettings.maintenance_mode}
-                        onChange={(e) => setSystemSettings({ ...systemSettings, maintenance_mode: e.target.checked })}
+                    <Button onClick={handleSaveSettings} className="bg-indigo-600 hover:bg-indigo-700 text-white w-full sm:w-auto self-end mt-2">
+                      Save Maintenance Settings
+                    </Button>
+                  </div>
+
+                  {/* Announcement Banner Block */}
+                  <div className="flex flex-col gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div>
+                      <h4 className="font-bold text-slate-900 dark:text-white">Global Announcement Banner</h4>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Display a sticky banner at the top of the app for all users.</p>
+                      <Input
+                        placeholder="e.g. New feature dropping tomorrow!"
+                        value={systemSettings.announcement_message}
+                        onChange={(e) => setSystemSettings({ ...systemSettings, announcement_message: e.target.value })}
+                        className="w-full bg-white dark:bg-slate-950"
                       />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-rose-500"></div>
-                    </label>
+                    </div>
+                    <Button onClick={handleSaveSettings} className="bg-indigo-600 hover:bg-indigo-700 text-white w-full sm:w-auto self-end mt-2">
+                      Save Banner Settings
+                    </Button>
                   </div>
-
-                  <div className="space-y-2 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <h4 className="font-bold text-slate-900 dark:text-white">Global Announcement Banner</h4>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Display a sticky banner at the top of the app for all users.</p>
-                    <Input
-                      placeholder="e.g. New feature dropping tomorrow!"
-                      value={systemSettings.announcement_message}
-                      onChange={(e) => setSystemSettings({ ...systemSettings, announcement_message: e.target.value })}
-                      className="w-full bg-white dark:bg-slate-950"
-                    />
-                  </div>
-
-                  <Button onClick={handleSaveSettings} className="bg-indigo-600 hover:bg-indigo-700 text-white w-full py-6">
-                    Save System Settings
-                  </Button>
                 </div>
               </div>
 
