@@ -14,6 +14,7 @@ interface AddFriendsStepProps {
   updatePerson: (id: string, name: string) => void
   removePerson: (id: string) => void
   onContinue: () => void
+  onBack?: () => void
 }
 
 export function AddFriendsStep({
@@ -22,6 +23,7 @@ export function AddFriendsStep({
   updatePerson,
   removePerson,
   onContinue,
+  onBack,
 }: AddFriendsStepProps) {
   const [newName, setNewName] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -72,8 +74,16 @@ export function AddFriendsStep({
 
   return (
     <>
-      <Card className="border-border/50 shadow-lg">
-        <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <Card className="border-border/50 shadow-lg relative">
+        {onBack && (
+          <div className="absolute top-4 right-4 z-10">
+            <Button variant="ghost" size="sm" onClick={onBack} className="text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4 mr-1" />
+              Close
+            </Button>
+          </div>
+        )}
+        <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-12 sm:pt-6">
           <div>
             <CardTitle className="flex items-center gap-2 text-xl">
               <Users className="h-5 w-5 text-primary" />

@@ -506,6 +506,10 @@ export function ExpenseSplitter({
                       updatePerson={updatePerson}
                       removePerson={removePerson}
                       onContinue={() => setCurrentStep(2)}
+                      onBack={() => {
+                        clearActiveBill()
+                        setCurrentStep(0)
+                      }}
                     />
                   )}
 
