@@ -400,9 +400,9 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
           <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-blue-500/0 group-hover:bg-blue-500/5 blur-3xl transition-colors duration-500 pointer-events-none" />
           
           {/* Etriq Logo / Icon */}
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-100 dark:to-slate-300 flex flex-col items-center justify-center text-white dark:text-slate-900 shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
-            <span className="font-black text-2xl italic tracking-tighter leading-none pr-1">E</span>
-            <div className="w-4 h-1 bg-blue-500 rounded-full mt-1"></div>
+          <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-950 flex flex-col items-center justify-center shrink-0 shadow-md border border-slate-200 dark:border-slate-800 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <img src="/etriqlogo.webp" alt="Etriq" className="w-full h-full object-contain p-2 dark:hidden" />
+            <img src="/etriqlogodark.png" alt="Etriq" className="w-full h-full object-contain p-2 hidden dark:block" />
           </div>
 
           <div className="text-center sm:text-left space-y-2">
