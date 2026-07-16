@@ -133,7 +133,6 @@ export default function Home() {
           <img src="/maintenance.webp" alt="Maintenance Mode" className="w-full h-full object-contain relative z-10 drop-shadow-sm" />
         </div>
         <h1 className="text-4xl font-black text-emerald-900 tracking-tight mb-4 flex items-center justify-center gap-3 w-full">
-          <Settings2 className="h-8 w-8 text-emerald-600 animate-spin-slow" />
           System Maintenance
         </h1>
         <p className="text-emerald-700 max-w-md mx-auto text-lg leading-relaxed">
