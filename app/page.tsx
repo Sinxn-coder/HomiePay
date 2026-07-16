@@ -25,7 +25,7 @@ function MaintenanceScreen() {
   useEffect(() => {
     const interval = setInterval(() => {
       setMsgIndex(prev => (prev + 1) % MAINTENANCE_MESSAGES.length);
-    }, 3000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
