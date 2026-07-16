@@ -262,8 +262,8 @@ class NavGlassErrorBoundary extends Component<{ children: ReactNode; tabCount: n
           style={{
             position: "absolute",
             top: 6, bottom: 6,
-            left: `calc(6px + ${pct}%)`,
-            width: `calc(${100 / tabCount}% - 12px / ${tabCount})`,
+            left: `calc(6px + ((100% - 12px) / ${tabCount}) * ${activeIndex})`,
+            width: `calc((100% - 12px) / ${tabCount})`,
             borderRadius: 22,
             background: "rgba(255,255,255,0.55)",
             border: "0.5px solid rgba(255,255,255,0.8)",
