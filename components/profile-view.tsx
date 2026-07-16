@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { supabase } from "@/lib/supabase"
 import { SecurityPage } from "@/components/security-page"
+import { AvatarPage } from "@/components/avatar-page"
 
 interface ProfileViewProps {
   userSession: { id: string; username: string; full_name: string }
@@ -29,12 +30,18 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
   const [supportMessage, setSupportMessage] = useState("")
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false)
   const [showSecurityPage, setShowSecurityPage] = useState(false)
+  const [showAvatarPage, setShowAvatarPage] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   const [pushEnabled, setPushEnabled] = useState(false)
   const [isTogglingPush, setIsTogglingPush] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    const savedAvatar = localStorage.getItem("homiepay-avatar")
+    if (savedAvatar) {
+      setAvatarUrl(savedAvatar)
+    }
     const checkPush = async () => {
       if ('serviceWorker' in navigator && 'PushManager' in window) {
         const registration = await navigator.serviceWorker.ready;
@@ -194,6 +201,20 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
     return <SecurityPage userSession={userSession} onBack={() => setShowSecurityPage(false)} />
   }
 
+  if (showAvatarPage) {
+    return (
+      <AvatarPage 
+        currentAvatar={avatarUrl}
+        onClose={() => setShowAvatarPage(false)}
+        onSave={(url) => {
+          setAvatarUrl(url)
+          localStorage.setItem("homiepay-avatar", url)
+          setShowAvatarPage(false)
+        }}
+      />
+    )
+  }
+
   if (!mounted) return null
 
   return (
@@ -205,14 +226,19 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
         {/* Glow effect */}
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none" />
         
-        {/* Initials Avatar */}
+        {/* Initials/Image Avatar */}
         <div className="relative shrink-0 scale-105">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800">
-            {getInitials(userSession.full_name)}
+          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800 overflow-hidden">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              getInitials(userSession.full_name)
+            )}
           </div>
           <button 
             type="button"
-            className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1.5 sm:p-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group"
+            onClick={() => setShowAvatarPage(true)}
+            className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1.5 sm:p-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group z-10"
           >
             <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 group-hover:text-emerald-500 transition-colors" />
           </button>
