@@ -230,7 +230,7 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
         <div className="relative shrink-0 scale-105">
           <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800 overflow-hidden">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover scale-[1.35]" />
             ) : (
               getInitials(userSession.full_name)
             )}

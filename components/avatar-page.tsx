@@ -53,8 +53,8 @@ export function AvatarPage({ currentAvatar, onClose, onSave }: AvatarPageProps) 
       </div>
 
       {/* Content */}
-      <div className="flex-1 w-full max-w-2xl mx-auto p-6 flex flex-col items-center">
-        <p className="text-slate-500 dark:text-slate-400 font-medium mb-8 text-center">
+      <div className="flex-1 w-full max-w-2xl mx-auto p-8 sm:p-12 flex flex-col items-center">
+        <p className="text-slate-500 dark:text-slate-400 font-medium mb-10 text-center text-lg">
           Choose a unique animated avatar for your profile
         </p>
 
