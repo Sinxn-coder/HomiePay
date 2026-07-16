@@ -237,7 +237,7 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
               <img 
                 src={avatarUrl} 
                 alt="Profile" 
-                className={`w-full h-full object-cover scale-[1.35] drop-shadow-md ${
+                className={`w-full h-full object-contain drop-shadow-xl scale-110 ${
                   avatarUrl.includes('female2.gif') ? '-translate-y-1 sm:-translate-y-2' : ''
                 }`} 
               />
