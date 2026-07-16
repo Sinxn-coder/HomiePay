@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import { Shield, Wallet, Lock, User, LogOut, Users, UsersRound, ReceiptText, LayoutDashboard, Settings, MoreVertical, Edit, KeyRound, Ban, CheckCircle2, Trash2, Eye, Flag, AlertTriangle, LifeBuoy, Check, Megaphone, Server, Send, Plus } from "lucide-react"
+import { Shield, Wallet, Lock, User, LogOut, Users, UsersRound, ReceiptText, LayoutDashboard, Settings, MoreVertical, Edit, KeyRound, Ban, CheckCircle2, Trash2, Eye, Flag, AlertTriangle, LifeBuoy, Check, Megaphone, Server, Send, Plus, Activity, Clock } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -530,7 +530,7 @@ export default function AdminPage() {
 
           {activeTab === "dashboard" && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
                     <User className="h-6 w-6" />
@@ -554,8 +554,98 @@ export default function AdminPage() {
                     <ReceiptText className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-500">Total Bills Split</p>
+                    <p className="text-sm font-semibold text-slate-500">Total Bills</p>
                     <p className="text-3xl font-black text-slate-900 dark:text-white">{stats.bills}</p>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center shrink-0">
+                    <Wallet className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-500">Total Volume</p>
+                    <p className="text-3xl font-black text-slate-900 dark:text-white">₹{totalMoneyTracked.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions & Recent Activity Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Support Tickets Summary */}
+                <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <LifeBuoy className="h-5 w-5 text-indigo-500" />
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Support Desk</h3>
+                    </div>
+                    <div className="space-y-4 mb-6">
+                      <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <span className="text-slate-500 font-medium">Total Tickets</span>
+                        <span className="font-bold text-slate-900 dark:text-white">{supportTicketsList.length}</span>
+                      </div>
+                      <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <span className="text-slate-500 font-medium">Open Tickets</span>
+                        <span className="font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-3 py-1 rounded-full text-sm">
+                          {supportTicketsList.filter(t => t.status === 'open').length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <Button onClick={() => setActiveTab("support")} className="w-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40">
+                    View All Tickets
+                  </Button>
+                </div>
+
+                {/* Recent Activity Feed */}
+                <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-5 w-5 text-emerald-500" />
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recent Activity</h3>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setActiveTab("audit")} className="text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                      View Audit Log
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-5">
+                    {auditLogsList.slice(0, 5).map((log) => {
+                      let actionText = ""
+                      const targetName = log.record_details?.name || log.record_details?.subject || log.record_details?.username || "an item"
+                      let badgeColor = "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                      
+                      if (log.action_type === "INSERT") {
+                        actionText = `Created ${targetName} in ${log.table_name}`
+                        badgeColor = "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                      } else if (log.action_type === "UPDATE") {
+                        actionText = `Updated ${targetName} in ${log.table_name}`
+                        badgeColor = "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                      } else if (log.action_type === "DELETE") {
+                        actionText = `Deleted ${targetName} from ${log.table_name}`
+                        badgeColor = "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400"
+                      }
+
+                      return (
+                        <div key={log.id} className="flex items-center gap-4 group">
+                          <div className={`w-2 h-2 rounded-full ${badgeColor.split(' ')[0]}`} />
+                          <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                              {log.users ? <span className="font-bold text-slate-900 dark:text-white mr-1">@{log.users.username}</span> : null}
+                              {actionText}
+                            </p>
+                            <span className="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                              <Clock className="h-3 w-3" />
+                              {new Date(log.created_at).toLocaleDateString()} {new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {auditLogsList.length === 0 && (
+                      <div className="text-center py-6 text-sm text-slate-500 italic border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                        No recent activity found. Make sure audit logs are enabled.
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

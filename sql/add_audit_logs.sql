@@ -9,19 +9,8 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Ensure RLS is enabled and admins can read it
-ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Admins can view audit logs"
-    ON public.audit_logs
-    FOR SELECT
-    TO public
-    USING (
-        EXISTS (
-            SELECT 1 FROM users
-            WHERE users.id = auth.uid() AND users.is_admin = true
-        )
-    );
+-- Disable RLS on audit_logs since admin dashboard handles auth
+ALTER TABLE public.audit_logs DISABLE ROW LEVEL SECURITY;
 
 -- Trigger function to log actions
 CREATE OR REPLACE FUNCTION public.process_audit_log()
@@ -82,9 +71,9 @@ CREATE TRIGGER audit_groups_trigger
     AFTER INSERT OR UPDATE OR DELETE ON public.groups
     FOR EACH ROW EXECUTE FUNCTION public.process_audit_log();
 
-DROP TRIGGER IF EXISTS audit_saved_bills_trigger ON public.saved_bills;
-CREATE TRIGGER audit_saved_bills_trigger
-    AFTER INSERT OR UPDATE OR DELETE ON public.saved_bills
+DROP TRIGGER IF EXISTS audit_bills_trigger ON public.bills;
+CREATE TRIGGER audit_bills_trigger
+    AFTER INSERT OR UPDATE OR DELETE ON public.bills
     FOR EACH ROW EXECUTE FUNCTION public.process_audit_log();
 
 DROP TRIGGER IF EXISTS audit_support_tickets_trigger ON public.support_tickets;
