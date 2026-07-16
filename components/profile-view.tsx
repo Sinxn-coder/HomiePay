@@ -401,8 +401,8 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
           
           {/* Etriq Logo / Icon */}
           <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-950 flex flex-col items-center justify-center shrink-0 shadow-md border border-slate-200 dark:border-slate-800 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
-            <img src="/etriqlogo.webp" alt="Etriq" className="w-full h-full object-contain p-2 dark:hidden" />
-            <img src="/etriqlogodark.png" alt="Etriq" className="w-full h-full object-contain p-2 hidden dark:block" />
+            <img src="/etriqlogodark.png" alt="Etriq" className="w-full h-full object-contain p-2 dark:hidden" />
+            <img src="/etriqlogo.webp" alt="Etriq" className="w-full h-full object-contain p-2 hidden dark:block" />
           </div>
 
           <div className="text-center sm:text-left space-y-2">
