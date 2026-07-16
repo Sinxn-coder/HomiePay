@@ -212,9 +212,9 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
           </div>
           <button 
             type="button"
-            className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-2 sm:p-2.5 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group"
+            className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1.5 sm:p-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group"
           >
-            <Camera className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 group-hover:text-emerald-500 transition-colors" />
+            <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 group-hover:text-emerald-500 transition-colors" />
           </button>
         </div>
 
