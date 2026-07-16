@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [pushTitle, setPushTitle] = useState("")
   const [pushBody, setPushBody] = useState("")
   const [pushTarget, setPushTarget] = useState("all")
+  const [pushSearchQuery, setPushSearchQuery] = useState("")
+  const [isPushDropdownOpen, setIsPushDropdownOpen] = useState(false)
 
   // User Actions State
   const [selectedUser, setSelectedUser] = useState<any>(null)
@@ -922,18 +924,49 @@ export default function AdminPage() {
                 </h3>
                 
                 <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-500 uppercase">Target Audience</label>
-                    <select 
-                      value={pushTarget}
-                      onChange={(e) => setPushTarget(e.target.value)}
-                      className="w-full h-10 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm"
-                    >
-                      <option value="all">All Users</option>
-                      {usersList.map(u => (
-                        <option key={u.id} value={u.id}>@{u.username} ({u.full_name})</option>
-                      ))}
-                    </select>
+                  <div className="space-y-2 relative">
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Target Audience (Search)</label>
+                    <Input
+                      placeholder="Search username... (default: All Users)"
+                      value={pushSearchQuery}
+                      onChange={(e) => {
+                        setPushSearchQuery(e.target.value)
+                        setIsPushDropdownOpen(true)
+                      }}
+                      onFocus={() => setIsPushDropdownOpen(true)}
+                      onBlur={() => setTimeout(() => setIsPushDropdownOpen(false), 200)}
+                      className="w-full bg-white dark:bg-slate-950"
+                    />
+                    {isPushDropdownOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md shadow-xl z-50">
+                        <div 
+                          className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm font-semibold border-b border-slate-100 dark:border-slate-800"
+                          onClick={() => {
+                            setPushTarget("all")
+                            setPushSearchQuery("All Users")
+                          }}
+                        >
+                          All Users
+                        </div>
+                        {usersList
+                          .filter(u => u.username.toLowerCase().startsWith(pushSearchQuery.toLowerCase().replace('@', '')))
+                          .map(u => (
+                            <div 
+                              key={u.id} 
+                              className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm"
+                              onClick={() => {
+                                setPushTarget(u.id)
+                                setPushSearchQuery(`@${u.username} (${u.full_name})`)
+                              }}
+                            >
+                              @{u.username} ({u.full_name})
+                            </div>
+                          ))}
+                        {usersList.filter(u => u.username.toLowerCase().startsWith(pushSearchQuery.toLowerCase().replace('@', ''))).length === 0 && (
+                          <div className="px-3 py-2 text-sm text-slate-500 italic">No users found.</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-500 uppercase">Notification Title</label>
