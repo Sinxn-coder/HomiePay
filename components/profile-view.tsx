@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { User, Calendar, Hash, ShieldCheck, Check, LogOut, Loader2, Sparkles, Coins, Users, LifeBuoy } from "lucide-react"
+import { User, Calendar, Hash, ShieldCheck, Check, LogOut, Loader2, Sparkles, Coins, Users, LifeBuoy, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -28,9 +28,75 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
   const [supportMessage, setSupportMessage] = useState("")
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false)
 
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [isTogglingPush, setIsTogglingPush] = useState(false)
+
   useEffect(() => {
     setMounted(true)
+    const checkPush = async () => {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        setPushEnabled(!!subscription);
+      }
+    }
+    checkPush()
   }, [])
+
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  const togglePushNotifications = async () => {
+    setIsTogglingPush(true)
+    try {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+      const registration = await navigator.serviceWorker.ready;
+  
+      if (pushEnabled) {
+        // Turn off
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          await supabase.from('push_subscriptions').delete().eq('endpoint', subscription.endpoint);
+          await subscription.unsubscribe();
+        }
+        localStorage.setItem('homiepay-push-opt-out', 'true');
+        setPushEnabled(false);
+      } else {
+        // Turn on
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          alert("Please enable notifications in your browser settings.");
+          setIsTogglingPush(false);
+          return;
+        }
+        const vapidPublicKey = 'BA8b7deu7x4Y8zadSwR1HXtLWzhHrvI7WKB2jCEM5l8BGrUIxkQSgHlSxgz0y_VG-1SelmJunP7LWJTN_34gg6Q';
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        });
+        const subData = JSON.parse(JSON.stringify(subscription));
+        await supabase.from('push_subscriptions').upsert({
+          user_id: userSession.id,
+          endpoint: subData.endpoint,
+          p256dh: subData.keys.p256dh,
+          auth: subData.keys.auth
+        }, { onConflict: 'user_id,endpoint' });
+        localStorage.removeItem('homiepay-push-opt-out');
+        setPushEnabled(true);
+      }
+    } catch (e) {
+      console.error("Error toggling push notifications:", e);
+    }
+    setIsTogglingPush(false)
+  }
 
   const getInitials = (name: string) => {
     return name
@@ -79,7 +145,19 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
     }
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          await supabase.from('push_subscriptions').delete().eq('endpoint', subscription.endpoint);
+          await subscription.unsubscribe();
+        }
+      }
+    } catch (e) {
+      console.error("Error cleaning up push subscription on logout:", e);
+    }
     localStorage.removeItem("homiepay-user-session")
     window.location.reload() // Force reload to clear all states cleanly
   }
@@ -256,9 +334,33 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
               <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-450" />
               Your Privacy & Security
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
               Your account is fully protected. Your password is securely encrypted, and all your groups, shared bills, and expenses are safely backed up to the cloud.
             </p>
+
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-200/40 dark:border-slate-800/40 rounded-xl mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center shadow-sm">
+                  <Bell className="h-4 w-4 text-indigo-600 dark:text-indigo-450" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">Push Notifications</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                    {pushEnabled ? "Enabled" : "Disabled"}
+                  </p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={pushEnabled}
+                  onChange={togglePushNotifications}
+                  disabled={isTogglingPush}
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-indigo-500"></div>
+              </label>
+            </div>
             <Button
               onClick={handleLogout}
               variant="outline"

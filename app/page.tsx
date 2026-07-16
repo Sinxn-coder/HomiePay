@@ -82,6 +82,9 @@ export default function Home() {
   const registerPushNotifications = async (userId: string) => {
     try {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+      // Do not auto-register if the user explicitly opted out in their profile
+      if (localStorage.getItem('homiepay-push-opt-out') === 'true') return;
+
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') return;
 

@@ -74,9 +74,12 @@ serve(async (req) => {
           auth: sub.auth
         }
       }
-      return webpush.sendNotification(pushSubscription, payload).catch(err => {
+      return webpush.sendNotification(pushSubscription, payload).catch(async (err) => {
         console.error("Error sending to endpoint:", sub.endpoint, err)
-        // If the subscription is gone (410) we could delete it from the DB here
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          console.log("Subscription expired or invalid, deleting from DB:", sub.endpoint)
+          await supabase.from("push_subscriptions").delete().eq("endpoint", sub.endpoint)
+        }
       })
     })
 
