@@ -228,7 +228,11 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
         
         {/* Initials/Image Avatar */}
         <div className="relative shrink-0 scale-105 z-10">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800">
+          <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center text-white text-3xl sm:text-5xl font-black ${
+            avatarUrl 
+              ? '' 
+              : 'bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 shadow-md border-4 border-white dark:border-slate-800'
+          }`}>
             {avatarUrl ? (
               <img 
                 src={avatarUrl} 
