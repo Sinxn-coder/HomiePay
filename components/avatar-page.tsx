@@ -38,7 +38,7 @@ export function AvatarPage({ currentAvatar, onClose, onSave }: AvatarPageProps) 
   if (!mounted) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-950 flex flex-col overflow-y-auto animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 z-[9999] bg-slate-50 dark:bg-slate-950 flex flex-col overflow-y-auto animate-in slide-in-from-right duration-300">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-4 flex items-center justify-between shadow-sm">
         <Button 
@@ -53,7 +53,7 @@ export function AvatarPage({ currentAvatar, onClose, onSave }: AvatarPageProps) 
       </div>
 
       {/* Content */}
-      <div className="flex-1 w-full max-w-2xl mx-auto p-8 sm:p-12 flex flex-col items-center">
+      <div className="flex-1 w-full max-w-2xl mx-auto p-8 pb-24 sm:p-12 flex flex-col items-center">
         <p className="text-slate-500 dark:text-slate-400 font-medium mb-10 text-center text-lg">
           Choose a unique animated avatar for your profile
         </p>
