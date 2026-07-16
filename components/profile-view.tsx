@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { User, Calendar, Hash, ShieldCheck, Check, LogOut, Loader2, Sparkles, Coins, Users, LifeBuoy, Bell, Lock } from "lucide-react"
+import { User, Calendar, Hash, ShieldCheck, Check, LogOut, Loader2, Sparkles, Coins, Users, LifeBuoy, Bell, Lock, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -206,8 +206,16 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none" />
         
         {/* Initials Avatar */}
-        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800 shrink-0 scale-105">
-          {getInitials(userSession.full_name)}
+        <div className="relative shrink-0 scale-105">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800">
+            {getInitials(userSession.full_name)}
+          </div>
+          <button 
+            type="button"
+            className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-2 sm:p-2.5 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group"
+          >
+            <Camera className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 group-hover:text-emerald-500 transition-colors" />
+          </button>
         </div>
 
         {/* Profile Meta details */}
