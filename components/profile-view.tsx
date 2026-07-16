@@ -1,9 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { User, Calendar, Hash, ShieldCheck, Check, LogOut, Loader2, Sparkles, Coins, Users } from "lucide-react"
+import { User, Calendar, Hash, ShieldCheck, Check, LogOut, Loader2, Sparkles, Coins, Users, LifeBuoy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { supabase } from "@/lib/supabase"
 
 interface ProfileViewProps {
@@ -19,6 +21,12 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
   const [success, setSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
   const [mounted, setMounted] = useState(false)
+  
+  // Support Ticket State
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
+  const [supportSubject, setSupportSubject] = useState("")
+  const [supportMessage, setSupportMessage] = useState("")
+  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -76,8 +84,34 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
     window.location.reload() // Force reload to clear all states cleanly
   }
 
+  const handleSubmitTicket = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!supportSubject.trim() || !supportMessage.trim()) return
+    setIsSubmittingTicket(true)
+    
+    try {
+      const { error } = await supabase.from('support_tickets').insert({
+        user_id: userSession.id,
+        subject: supportSubject.trim(),
+        message: supportMessage.trim()
+      })
+      
+      if (error) throw error
+      
+      setIsSupportModalOpen(false)
+      setSupportSubject("")
+      setSupportMessage("")
+      alert("Support ticket submitted successfully! Our team will look into it.")
+    } catch (err: any) {
+      console.error("Failed to submit ticket:", err)
+      alert(err.message || "Could not submit ticket. Please try again.")
+    } finally {
+      setIsSubmittingTicket(false)
+    }
+  }
+
   return (
-    <div className="w-[95vw] max-w-3xl relative left-1/2 -translate-x-1/2 sm:w-full sm:left-auto sm:translate-x-0 mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="w-[95vw] max-w-3xl relative left-1/2 -translate-x-1/2 sm:w-full sm:left-auto sm:translate-x-0 mx-auto space-y-6 pb-24 md:pb-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
       
       {/* Premium Gradient Header Card */}
       <div className="relative rounded-3xl p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-100 dark:shadow-none overflow-hidden flex flex-col sm:flex-row items-center gap-6">
@@ -233,10 +267,95 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
               <LogOut className="h-3.5 w-3.5" />
               Logout from Device
             </Button>
+            
+            <Button
+              onClick={() => setIsSupportModalOpen(true)}
+              variant="outline"
+              className="w-full mt-3 py-5 rounded-xl border-indigo-200 dark:border-indigo-950 text-indigo-600 dark:text-indigo-450 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-700 dark:hover:text-indigo-350 font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            >
+              <LifeBuoy className="h-3.5 w-3.5" />
+              Contact Help Desk
+            </Button>
           </div>
 
         </div>
       </div>
+
+      {/* Etriq Branding Card */}
+      <div className="w-full mt-10 mb-6 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-6 duration-500 delay-150">
+        <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+          <span>Powered By</span>
+          <span className="w-8 h-[1px] bg-slate-200 dark:bg-slate-800 rounded-full"></span>
+        </div>
+        
+        <a 
+          href="https://etriq.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="group relative bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200/90 dark:border-slate-800/90 shadow-xl shadow-slate-200/50 dark:shadow-none hover:shadow-2xl hover:shadow-slate-200 dark:hover:border-slate-700/80 transition-all duration-300 w-full max-w-lg flex flex-col sm:flex-row items-center gap-6 overflow-hidden cursor-pointer"
+        >
+          {/* Subtle glow effect on hover */}
+          <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-blue-500/0 group-hover:bg-blue-500/5 blur-3xl transition-colors duration-500 pointer-events-none" />
+          
+          {/* Etriq Logo / Icon */}
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-100 dark:to-slate-300 flex flex-col items-center justify-center text-white dark:text-slate-900 shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
+            <span className="font-black text-2xl italic tracking-tighter leading-none pr-1">E</span>
+            <div className="w-4 h-1 bg-blue-500 rounded-full mt-1"></div>
+          </div>
+
+          <div className="text-center sm:text-left space-y-2">
+            <div className="flex items-center justify-center sm:justify-start gap-2">
+              <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Etriq</h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+              We build beautiful, highly-functional digital experiences. Discover our latest projects and see how we can transform your ideas into reality.
+            </p>
+            <div className="pt-1 inline-flex items-center text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+              Visit Website <Sparkles className="h-3 w-3 ml-1" />
+            </div>
+          </div>
+        </a>
+      </div>
+
+      {/* Support Ticket Modal */}
+      <Dialog open={isSupportModalOpen} onOpenChange={setIsSupportModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-indigo-600">
+              <LifeBuoy className="h-5 w-5" />
+              Contact Help Desk
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmitTicket} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-500 uppercase">Subject</label>
+              <Input
+                value={supportSubject}
+                onChange={(e) => setSupportSubject(e.target.value)}
+                placeholder="e.g. Bug report, Feature request..."
+                required
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-500 uppercase">Message</label>
+              <Textarea
+                value={supportMessage}
+                onChange={(e) => setSupportMessage(e.target.value)}
+                placeholder="Describe your issue or feedback in detail..."
+                required
+                className="w-full min-h-[120px] resize-none"
+              />
+            </div>
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsSupportModalOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={isSubmittingTicket} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                {isSubmittingTicket ? "Submitting..." : "Submit Ticket"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
     </div>
   )
