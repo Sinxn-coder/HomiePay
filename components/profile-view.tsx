@@ -227,14 +227,14 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none" />
         
         {/* Initials/Image Avatar */}
-        <div className="relative shrink-0 scale-105">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800 overflow-hidden">
+        <div className="relative shrink-0 scale-105 z-10">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-500 to-teal-400 flex items-center justify-center text-white text-3xl sm:text-5xl font-black shadow-md border-4 border-white dark:border-slate-800">
             {avatarUrl ? (
               <img 
                 src={avatarUrl} 
                 alt="Profile" 
-                className={`w-full h-full object-cover scale-[1.35] ${
-                  avatarUrl.includes('female2.gif') ? '-translate-y-4' : ''
+                className={`w-full h-full object-cover scale-[1.35] drop-shadow-md ${
+                  avatarUrl.includes('female2.gif') ? '-translate-y-1 sm:-translate-y-2' : ''
                 }`} 
               />
             ) : (
@@ -244,7 +244,7 @@ export function ProfileView({ userSession, onProfileUpdate, totalGroups, totalBi
           <button 
             type="button"
             onClick={() => setShowAvatarPage(true)}
-            className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1.5 sm:p-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group z-10"
+            className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-1.5 sm:p-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer group z-20"
           >
             <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 group-hover:text-emerald-500 transition-colors" />
           </button>
