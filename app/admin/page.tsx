@@ -58,7 +58,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     // Only used for the very first page load to check if already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
       setSession(session)
       setIsLoading(false)
       if (session) fetchDashboardData()
@@ -83,22 +83,22 @@ export default function AdminPage() {
       })
       
       if (usersRes.data) {
-        setUsersList(usersRes.data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+        setUsersList(usersRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
       }
       
       if (groupsDataRes.data) {
-        setGroupsList(groupsDataRes.data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+        setGroupsList(groupsDataRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
       }
 
       if (billsDataRes.data) {
-        const sortedBills = billsDataRes.data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        const sortedBills = billsDataRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         setBillsList(sortedBills)
-        const totalVolume = sortedBills.reduce((acc, bill) => acc + (bill.grand_total || 0), 0)
+        const totalVolume = sortedBills.reduce((acc: number, bill: any) => acc + (bill.grand_total || 0), 0)
         setTotalMoneyTracked(totalVolume)
       }
 
       if (supportRes.data) {
-        setSupportTicketsList(supportRes.data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+        setSupportTicketsList(supportRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
       }
     } catch (err) {
       console.error("Error fetching admin data:", err)
@@ -239,7 +239,7 @@ export default function AdminPage() {
         .eq('group_id', group.id)
       
       if (!error && data) {
-        const total = data.reduce((acc, bill) => acc + (bill.grand_total || 0), 0)
+        const total = data.reduce((acc: number, bill: any) => acc + (bill.grand_total || 0), 0)
         setSelectedGroupTotal(total)
       }
     } catch (err) {
