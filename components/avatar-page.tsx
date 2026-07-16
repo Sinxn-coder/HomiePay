@@ -75,7 +75,9 @@ export function AvatarPage({ currentAvatar, onClose, onSave }: AvatarPageProps) 
                 <img 
                   src={avatarUrl} 
                   alt={`Avatar Option ${index + 1}`} 
-                  className={`w-full h-full object-cover transition-transform duration-300 ${isSelected ? "" : "group-hover:scale-110"}`}
+                  className={`w-full h-full object-cover transition-transform duration-300 ${isSelected ? "" : "group-hover:scale-110"} ${
+                    avatarUrl.includes('female2.gif') ? '-translate-y-2 sm:-translate-y-4 scale-110' : ''
+                  }`}
                 />
                 
                 {isSelected && (
