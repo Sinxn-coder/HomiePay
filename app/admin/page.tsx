@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import { Shield, Wallet, Lock, User, LogOut, Users, UsersRound, ReceiptText, LayoutDashboard, Settings, MoreVertical, Edit, KeyRound, Ban, CheckCircle2, Trash2, Eye, Flag, AlertTriangle, LifeBuoy, Check, Megaphone, Server, Send, Plus, Activity, Clock } from "lucide-react"
+import { Shield, Wallet, Lock, User, LogOut, Users, UsersRound, ReceiptText, LayoutDashboard, Settings, MoreVertical, Edit, KeyRound, Ban, CheckCircle2, Trash2, Eye, Flag, AlertTriangle, LifeBuoy, Check, Megaphone, Server, Send, Plus, Activity, Clock, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
