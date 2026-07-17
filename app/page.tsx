@@ -152,6 +152,10 @@ export default function Home() {
         setIsStarted(true) // Automatically bypass landing page if logged in!
         checkSecurityQuestion(session.id)
         registerPushNotifications(session.id)
+        
+        if (navigator.onLine) {
+          supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", session.id).then()
+        }
       } catch (e) {
         localStorage.removeItem("homiepay-user-session")
       }

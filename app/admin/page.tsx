@@ -31,6 +31,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "groups" | "bills" | "support" | "audit" | "settings">("dashboard")
   
   const [stats, setStats] = useState({ users: 0, groups: 0, bills: 0 })
+  const [growthStats, setGrowthStats] = useState({ dau: 0, mau: 0, premium: 0, groupsThisWeek: 0 })
   const [usersList, setUsersList] = useState<any[]>([])
   const [groupsList, setGroupsList] = useState<any[]>([])
   const [billsList, setBillsList] = useState<any[]>([])
@@ -77,7 +78,7 @@ export default function AdminPage() {
   const fetchDashboardData = async () => {
     try {
       const [usersRes, groupsRes, billsRes, groupsDataRes, billsDataRes, supportRes, settingsRes, auditLogsRes] = await Promise.all([
-        supabase.from("users").select("id, username, full_name, created_at, is_banned", { count: 'exact' }),
+        supabase.from("users").select("id, username, full_name, created_at, is_banned, last_active_at, is_premium", { count: 'exact' }),
         supabase.from("groups").select("id", { count: 'exact', head: true }),
         supabase.from("bills").select("id", { count: 'exact', head: true }),
         supabase.from("groups").select("*, users(username)"),
@@ -94,11 +95,29 @@ export default function AdminPage() {
       })
       
       if (usersRes.data) {
-        setUsersList(usersRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+        const users = usersRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setUsersList(users);
+
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+        const dau = users.filter((u: any) => u.last_active_at && new Date(u.last_active_at) > oneDayAgo).length;
+        const mau = users.filter((u: any) => u.last_active_at && new Date(u.last_active_at) > thirtyDaysAgo).length;
+        const premium = users.filter((u: any) => u.is_premium).length;
+
+        setGrowthStats(prev => ({ ...prev, dau, mau, premium }));
       }
       
       if (groupsDataRes.data) {
-        setGroupsList(groupsDataRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+        const groups = groupsDataRes.data.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setGroupsList(groups);
+        
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const groupsThisWeek = groups.filter((g: any) => new Date(g.created_at) > sevenDaysAgo).length;
+        
+        setGrowthStats(prev => ({ ...prev, groupsThisWeek }));
       }
 
       if (billsDataRes.data) {
@@ -226,6 +245,20 @@ export default function AdminPage() {
       await fetchDashboardData()
     } catch (err) {
       console.error("Error toggling ban:", err)
+    }
+  }
+
+  const handleTogglePremium = async (user: any) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ is_premium: !user.is_premium })
+        .eq('id', user.id)
+      
+      if (error) throw error
+      await fetchDashboardData()
+    } catch (err) {
+      console.error("Error toggling premium:", err)
     }
   }
 
@@ -569,6 +602,46 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {/* Growth Metrics Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center justify-center shrink-0">
+                    <Activity className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-500">DAU (24h)</p>
+                    <p className="text-3xl font-black text-slate-900 dark:text-white">{growthStats.dau}</p>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-2xl flex items-center justify-center shrink-0">
+                    <Clock className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-500">MAU (30d)</p>
+                    <p className="text-3xl font-black text-slate-900 dark:text-white">{growthStats.mau}</p>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center shrink-0">
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-500">Premium Users</p>
+                    <p className="text-3xl font-black text-slate-900 dark:text-white">{growthStats.premium}</p>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-2xl flex items-center justify-center shrink-0">
+                    <Plus className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-500">Groups (7d)</p>
+                    <p className="text-3xl font-black text-slate-900 dark:text-white">+{growthStats.groupsThisWeek}</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Quick Actions & Recent Activity Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Support Tickets Summary */}
@@ -675,7 +748,14 @@ export default function AdminPage() {
                     {usersList.map((u) => (
                       <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300">
-                          @{u.username}
+                          <div className="flex items-center gap-2">
+                            @{u.username}
+                            {u.is_premium && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 uppercase tracking-wider">
+                                Pro
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{u.full_name || '—'}</td>
                         <td className="px-6 py-4">
@@ -705,6 +785,9 @@ export default function AdminPage() {
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => { setSelectedUser(u); setIsResetPwdModalOpen(true); }} className="cursor-pointer">
                                 <KeyRound className="h-4 w-4 mr-2 text-amber-500" /> Reset Password
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleTogglePremium(u)} className="cursor-pointer text-indigo-600 focus:text-indigo-600">
+                                <Sparkles className="h-4 w-4 mr-2" /> {u.is_premium ? "Revoke Premium" : "Grant Premium"}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleToggleBan(u)} className="cursor-pointer text-rose-600 focus:text-rose-600">
                                 <Ban className="h-4 w-4 mr-2" /> {u.is_banned ? "Unban User" : "Suspend User"}
